@@ -8,6 +8,11 @@ import { WhatsAppLink } from './WhatsAppLink'
 /** Desktop: floating dock with CSS-only magnify. Under 1024px: bottom bar with Start a project always visible. */
 export function Dock({ products, settings }: { products: Product[]; settings: Settings }) {
   const wa = whatsappLink(settings.whatsapp, '/')
+  // Instagram and LinkedIn from Settings → socials, in that order.
+  const socials = (['instagram', 'linkedin'] as const).flatMap((kind) => {
+    const s = settings.socials.find((x) => x.url.includes(`${kind}.com`))
+    return s ? [{ ...s, kind }] : []
+  })
   return (
     <>
       <nav aria-label="Dock" className="dock pointer-events-none fixed inset-x-0 bottom-4 z-40 hidden justify-center lg:flex">
@@ -39,6 +44,16 @@ export function Dock({ products, settings }: { products: Product[]; settings: Se
               <span className="dock-label">WhatsApp</span>
             </WhatsAppLink>
           </li>
+          {socials.map((s) => (
+            <li key={s.url} className="dock-item">
+              <a href={s.url} target="_blank" rel="noopener" className="group relative block" aria-label={`Ascendit on ${s.label}`}>
+                <span className={`grid size-12 place-items-center rounded-[28%] border border-ink/10 shadow-[inset_0_1px_0_rgb(255_255_255/.6),0_6px_14px_-6px_rgb(14_14_18/.35)] ${SOCIAL[s.kind].tile}`}>
+                  {SOCIAL[s.kind].glyph}
+                </span>
+                <span className="dock-label">{s.label}</span>
+              </a>
+            </li>
+          ))}
           <li className="dock-item">
             <StartButton source="dock" className="group relative block" >
               <span className="grid size-12 place-items-center rounded-[28%] border border-ink/10 bg-gradient-to-b from-[#8EC5FF] to-aqua shadow-[inset_0_1px_0_rgb(255_255_255/.7),0_6px_14px_-6px_rgb(14_14_18/.35)]">
@@ -83,3 +98,24 @@ export function WaGlyph({ className }: { className?: string }) {
     </svg>
   )
 }
+
+const SOCIAL = {
+  instagram: {
+    tile: 'bg-[radial-gradient(circle_at_30%_110%,#FFD776_0%,#F77737_30%,#E1306C_55%,#C13584_75%,#833AB4_100%)]',
+    glyph: (
+      <svg viewBox="0 0 24 24" className="size-6 text-white" fill="none" stroke="currentColor" strokeWidth={1.9} aria-hidden>
+        <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  linkedin: {
+    tile: 'bg-gradient-to-b from-[#3A8BDB] to-[#0A66C2]',
+    glyph: (
+      <svg viewBox="0 0 24 24" className="size-6 text-white" fill="currentColor" aria-hidden>
+        <path d="M6.94 8.5H3.56V20h3.38zM5.25 3.5a1.97 1.97 0 1 0 0 3.94 1.97 1.97 0 0 0 0-3.94M20.44 13.4c0-3.1-1.65-5.15-4.5-5.15a3.9 3.9 0 0 0-3.5 1.92V8.5H9.2V20h3.38v-6.06c0-1.6.62-2.86 2.2-2.86 1.55 0 2.28 1.1 2.28 2.86V20h3.38z" />
+      </svg>
+    ),
+  },
+} as const
