@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; text-rendering: optimizeLegibility; }
+  body {
+    background: var(--color-paper) radial-gradient(var(--color-hairline) 1px, transparent 1px) 0 0 / 24px 24px;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--color-lime); color: var(--color-ink); }
+
+  /* Focus ring: 2px Aqua with 2px offset, everywhere. */
+  :focus-visible { outline: 2px solid var(--color-aqua); outline-offset: 2px; border-radius: 6px; }
+  input:focus-visible { outline-offset: 0; }
+
+  /* Currency: both prices ship in the HTML; show the visitor's. */
+  [data-cur="LKR"] { display: none; }
+  html[data-currency="LKR"] [data-cur="LKR"] { display: inline; }
+  html[data-currency="LKR"] [data-cur="USD"] { display: none; }
+}
+
+@layer components {
+  .btn-aqua {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    background-color: var(--color-aqua-deep);
+    background-image: linear-gradient(#4A8BFF, var(--color-aqua-deep));
+    color: #fff; font-weight: 600; border-radius: var(--radius-pill);
+    border: 1px solid rgb(14 14 18 / .12);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), 0 6px 16px -8px rgb(31 95 224 / .7);
+    text-shadow: 0 1px 0 rgb(14 14 18 / .2);
+    transition: filter .15s, transform .15s;
+    white-space: nowrap;
+  }
+  .btn-aqua:hover { filter: brightness(1.06); }
+  .btn-aqua:active { transform: translateY(1px); }
+  .btn-aqua:disabled { opacity: .6; cursor: progress; }
+  .btn-aqua { padding-inline: 1.25rem; height: 2.75rem; }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    height: 2.75rem; padding-inline: 1.25rem; border-radius: var(--radius-pill);
+    background: var(--color-window); color: var(--color-ink); font-weight: 500;
+    border: 1px solid var(--color-hairline);
+    box-shadow: inset 0 1px 0 #fff, 0 4px 12px -8px rgb(14 14 18 / .3);
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: rgb(14 14 18 / .25); }
+
+  .eyebrow { font-family: var(--font-mono); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--color-graphite); }
+  .display { font-family: var(--font-serif); font-style: italic; letter-spacing: -.01em; line-height: .95; }
+
+  .prose-os p { margin-block: 0 1em; font-size: 17px; line-height: 1.65; color: var(--color-ink); max-width: 68ch; }
+  .prose-os h2 { font-family: var(--font-serif); font-style: italic; font-size: 28px; margin: 1.6em 0 .5em; }
+  .prose-os ul { list-style: disc; padding-left: 1.2em; margin-bottom: 1em; }
+  .prose-os a { color: var(--color-aqua-deep); text-decoration: underline; text-underline-offset: 3px; }
+}
+
+/* Dock magnify: desktop pointer only, no JS. */
+.dock-item { transition: scale .18s cubic-bezier(.3,.7,.4,1.4), translate .18s; transform-origin: bottom center; }
+.dock-label {
+  position: absolute; bottom: calc(100% + 10px); left: 50%; translate: -50% 4px; opacity: 0; pointer-events: none;
+  white-space: nowrap; border-radius: 8px; background: var(--color-ink); color: var(--color-window);
+  font-size: 12px; padding: 3px 8px; transition: opacity .12s, translate .12s;
+}
+@media (hover: hover) and (min-width: 1024px) {
+  .dock-item:hover { scale: 1.4; translate: 0 -6px; }
+  .dock-item:hover + .dock-item, .dock-item:has(+ .dock-item:hover) { scale: 1.18; translate: 0 -3px; }
+  .dock-item:hover .dock-label, .dock-item:focus-within .dock-label { opacity: 1; translate: -50% 0; }
+}
+
+.footage-sheen { background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / .35) 50%, transparent 70%); background-size: 250% 100%; animation: sheen 6s linear infinite; }
+@keyframes sheen { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+
+.builder-pop { animation: pop .28s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.97); } }
+
+/* Boot cover: shown by the head script before paint, removed by <Boot/>; CSS fades it anyway if JS dies. */
+html.booting body::after { content: ""; position: fixed; inset: 0; z-index: 99; background: var(--color-paper); animation: boot-cover-out .3s 2.2s forwards; }
+@keyframes boot-cover-out { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

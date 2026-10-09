@@ -1,0 +1,12 @@
+# Local Postgres for `pnpm dev` with the CMS (mirrors the Supabase `cms` schema setup).
+services:
+  db:
+    image: postgres:16
+    ports: ['5432:5432']
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: ascendit
+    volumes: ['pgdata:/var/lib/postgresql/data']
+volumes:
+  pgdata:

@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+coverage
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+playwright-report
+test-results
+.lighthouseci
+media

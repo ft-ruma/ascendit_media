@@ -1,0 +1,24 @@
+/* Ascendit OS design tokens: the one file a palette change touches. Light only in v1. */
+@theme {
+  --color-paper: #F4F4F1;
+  --color-window: #FFFFFF;
+  --color-ink: #0E0E12;
+  --color-graphite: #6B6B75;
+  --color-hairline: #E3E3E0;
+  --color-aqua: #2E7BFF;
+  --color-aqua-deep: #1F5FE0; /* aqua-deep for all blue text */
+  --color-lilac: #B9A6FF;
+  --color-lime: #C8F45A;
+  --color-tangerine: #FF8A3D;
+  --color-plaster: #EDE6DC;
+  --color-error: #B4321F; /* form errors only */
+
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-window: 14px;
+  --radius-pill: 999px;
+  --shadow-window: 0 1px 0 rgb(14 14 18 / .04), 0 18px 40px -16px rgb(14 14 18 / .18);
+  --shadow-lift: 0 1px 0 rgb(14 14 18 / .04), 0 28px 60px -20px rgb(14 14 18 / .28);
+}
