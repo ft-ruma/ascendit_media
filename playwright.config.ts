@@ -17,6 +17,8 @@ export default defineConfig({
     command: `pnpm start -p ${PORT}`,
     port: PORT,
     reuseExistingServer: !process.env.CI,
+    // The suite posts many briefs from one IP; lift the per-IP lead limit for the test server only.
+    env: { LEAD_RATE_LIMIT: '1000' },
     timeout: 120_000,
   },
 })

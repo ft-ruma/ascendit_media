@@ -58,6 +58,45 @@ n8n/                   lead-intake workflow notes, HMAC verify node, generated s
 supabase/cms-role.sql  cms schema + payload role with no CRM grants
 ```
 
+## Phone and tablet edition
+
+Under 1024 px the site becomes a phone OS; 1024 px and up is the desktop, unchanged.
+
+| Width | Mode |
+| --- | --- |
+| under 768 | Phone: status bar with the island, lock screen, home screen, frosted dock, builder as a bottom sheet |
+| 768 to 1023 | Tablet: same home screen with a 6-column grid; sheets open as centred modals |
+| 1024 and up | Desktop (menu bar, windows, beats) |
+
+How it stays one site: every route renders the same server HTML at every width and CSS picks
+the shell. Phone-only behaviour (gestures, Control Center, banner, app-open zoom) lives in
+`src/phone/PhoneRuntime.tsx` and is loaded only when the viewport is under 1024 px, so desktop
+visitors never download it. Nothing reads the user agent.
+
+- `src/phone/`: StatusBar + Island, LockScreen (server HTML, painted with the first frame), HomeScreen
+  and widgets, ServicesFolder, PhoneDock, AppNavBar (large title that collapses), BottomSheet,
+  ControlCenter, Banner, MessagesThread, TypedNote, Photos (swipe, pinch to zoom)
+- `src/builder/SheetBuilder.tsx`: one question per screen, pill answers, wallet-style estimate card;
+  same store, schemas, estimate and `/api/lead` as the desktop builder
+- New app routes: `/notes`, `/messages`, `/photos` (notes and messages are `noindex`: same content as `/studio`)
+- Pre-paint flags are data attributes on `<html>` set by the head script (`data-lock`,
+  `data-reduce-motion`, `data-js`), so React hydration never touches them
+- Control Center settings (sound, volume, reduce motion, currency) persist in localStorage through
+  `src/lib/safe-storage.ts`, which swallows storage errors
+
+Checks: `tests/e2e/phone.spec.ts` (375/390/430 px, tablet 768/1023, 1024 desktop edge) and
+`tests/visual/desktop-snap.mjs` + `tests/visual/diff.py`, which proved desktop pixel-identical before
+and after (13 routes at 1024/1280/1440). Screenshots: `docs/screenshots/mobile/`.
+
+Lighthouse (mobile, DevTools throttling: slow 4G, 4x CPU): Performance 94, LCP 2.2 s, Accessibility
+100 on `/` and `/products/pos`. With Lighthouse's default simulated throttling the home page scores
+82 (LCP 4.7 s), because the hidden desktop beats' JavaScript still loads on phones; splitting
+those beats into a desktop-only chunk is the next performance step. CI uses DevTools throttling.
+
+Phone copy differences (on purpose): the phone hero says "From the shop floor *to the cloud*" and
+the Services folder labels read "Software & AI" and "Web & E-com"; the CMS names (desktop, SEO) are
+unchanged. The client count shown everywhere comes from Settings → stats.
+
 ## Decisions that differ slightly from the plan
 
 - **Currency is static-cache friendly.** Prices render in both currencies; a tiny head

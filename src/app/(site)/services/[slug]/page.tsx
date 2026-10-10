@@ -68,8 +68,8 @@ export default async function ServicePage({ params }: Props) {
         <section aria-labelledby="walkthrough" className="border-b border-hairline p-4 sm:p-8">
           <h2 id="walkthrough" className="sr-only">Store walkthrough</h2>
           <div className="overflow-hidden rounded-window border border-hairline">
-            <div className="flex h-9 items-center justify-center border-b border-hairline bg-paper font-mono text-[13px] text-graphite">walkthrough.mov</div>
-            <div className="aspect-[21/9]"><Footage label="3D walkthrough of a finished store design" tone="plaster" /></div>
+            <div className="flex h-9 items-center justify-center border-b border-hairline bg-paper font-mono text-[13px] text-graphite">walkthrough.mov<span className="lg:hidden">&nbsp;· vertical</span></div>
+            <div className="aspect-[21/9] max-lg:aspect-[9/16] max-lg:max-h-[78svh]"><Footage label="3D walkthrough of a finished store design" tone="plaster" /></div>
           </div>
         </section>
       )}

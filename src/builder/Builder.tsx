@@ -7,7 +7,8 @@ import { cue } from '@/lib/sound'
 import type { RateCard } from '@/lib/types'
 import { estimate } from './estimate'
 import { Choices, Question, SubQuestion, TextField } from './fields'
-import { BUDGETS, contactSchema, OPTIONS, PILLARS, type Pillar, STEPS, validateStep } from './schema'
+import { BUDGETS, OPTIONS, PILLARS, type Pillar, STEPS, validateStep } from './schema'
+import { submitBrief } from './submitBrief'
 import { useBuilder } from './store'
 import { Turnstile } from './Turnstile'
 import { usePartialLead } from './usePartialLead'
@@ -104,24 +105,8 @@ export function Builder({ rateCard, variant = 'page', onDone }: Props) {
     setStatus('sending')
     setSendError(null)
     try {
-      const res = await fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          type: 'builder',
-          status: 'complete',
-          answers: { what: draft.what, business: draft.business, scope: draft.scope, timeline: draft.timeline, budget: draft.budget },
-          contact: contactSchema.parse(draft.contact),
-          currency,
-          source,
-          page: location.pathname,
-          turnstileToken: token,
-          website: hp.current?.value ?? '',
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.ok) throw new Error(data.error ?? 'Something went wrong')
-      setStatus('sent', data.reference)
+      const reference = await submitBrief({ draft, currency, source, token, honeypot: hp.current?.value ?? '' })
+      setStatus('sent', reference)
       track('Brief sent', { source })
       void cue('briefSent')
     } catch (err) {

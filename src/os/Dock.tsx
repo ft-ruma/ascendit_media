@@ -67,26 +67,7 @@ export function Dock({ products, settings }: { products: Product[]; settings: Se
         </ul>
       </nav>
 
-      {/* Phone home screen bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-paper/85 px-4 pb-[max(env(safe-area-inset-bottom),10px)] pt-2.5 backdrop-blur-xl lg:hidden">
-        <div className="flex items-center gap-2">
-          {products.map((p) => (
-            <Link key={p.slug} href={`/products/${p.slug}`} aria-label={p.name}>
-              <AppIcon glyph={p.glyph} accent={p.accent} className="size-10 text-[12px]" />
-            </Link>
-          ))}
-          <StartButton source="mobile-bar" className="btn-aqua ml-auto h-10 px-5 text-[15px]">
-            Start a project
-          </StartButton>
-        </div>
-      </div>
-      <WhatsAppLink
-        href={wa}
-        label="WhatsApp us"
-        className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-2 rounded-pill border border-ink/10 bg-[#25D366] px-4 py-2.5 text-[14px] font-medium text-ink shadow-window lg:hidden"
-      >
-        <WaGlyph className="size-4" /> WhatsApp
-      </WhatsAppLink>
+      {/* Phones and tablets use PhoneDock (src/phone). */}
     </>
   )
 }

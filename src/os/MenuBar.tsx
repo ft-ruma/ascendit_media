@@ -17,7 +17,7 @@ export const NAV = [
 
 export function MenuBar({ settings }: { settings: Settings }) {
   return (
-    <header className="sticky top-0 z-50 h-11 border-b border-hairline bg-paper/80 backdrop-blur-xl backdrop-saturate-150">
+    <header className="sticky top-0 z-50 h-11 max-lg:hidden border-b border-hairline bg-paper/80 backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex h-full max-w-[1536px] items-center gap-5 px-4 lg:px-6">
         <Link href="/" className="shrink-0" aria-label="Ascendit home">
           <Wordmark className="h-[18px] w-auto" />

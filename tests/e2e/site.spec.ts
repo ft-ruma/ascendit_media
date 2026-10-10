@@ -34,7 +34,8 @@ test('no video or media requests before scrolling', async ({ page }) => {
   expect(media).toEqual([])
 })
 
-test('window title opens its page and back returns home', async ({ page }) => {
+test('window title opens its page and back returns home', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'phones open apps from the home screen (phone.spec.ts)')
   await page.goto('/')
   await page.getByRole('link', { name: 'retail-design.app', exact: true }).click()
   await expect(page).toHaveURL(/\/services\/retail-design$/)

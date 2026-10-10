@@ -2,7 +2,8 @@
 // instance, which is enough with Turnstile in front; swap for Upstash/Redis if
 // abuse shows up across instances.
 const WINDOW_MS = 10 * 60 * 1000
-const LIMIT = 5
+// LEAD_RATE_LIMIT exists for the e2e test server only; production uses the default 5.
+const LIMIT = Number(process.env.LEAD_RATE_LIMIT) || 5
 const hits = new Map<string, { n: number; reset: number }>()
 
 export function rateLimit(key: string, now = Date.now()) {

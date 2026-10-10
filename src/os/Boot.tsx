@@ -15,6 +15,8 @@ export function Boot() {
   useEffect(() => {
     const uncover = () => document.documentElement.classList.remove('booting')
     try {
+      // Desktop only: phones and tablets get the lock screen instead.
+      if (!matchMedia('(min-width: 1024px)').matches) return uncover()
       if (sessionStorage.getItem(KEY) || prefersReducedMotion()) return uncover()
       sessionStorage.setItem(KEY, '1')
     } catch {

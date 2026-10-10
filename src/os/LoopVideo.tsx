@@ -17,7 +17,9 @@ export function LoopVideo({ video, label, className = '', tone = 'plaster' }: Pr
 
   useEffect(() => {
     const el = ref.current
-    if (!el || reduced) return
+    // Save Data: posters only (sources never attach, so nothing downloads).
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
+    if (!el || reduced || saveData) return
     const io = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {

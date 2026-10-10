@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { safeLocalStorage } from './safe-storage'
 import { prefersReducedMotion } from './useReducedMotion'
 
 // Every cue goes through cue(), so "off by default", the volume cap and
@@ -20,12 +21,13 @@ export type CueName =
 // get listed here. Until then each cue is synthesised as a placeholder.
 const CUE_FILES: Partial<Record<CueName, string>> = {}
 
-const MAX_VOLUME = 0.6
+export const MAX_VOLUME = 0.6
 
 type SoundState = {
   enabled: boolean
   volume: number
   setEnabled: (on: boolean) => void
+  setVolume: (v: number) => void
 }
 
 export const useSound = create<SoundState>()(
@@ -34,8 +36,9 @@ export const useSound = create<SoundState>()(
       enabled: false,
       volume: 0.3,
       setEnabled: (enabled) => set({ enabled }),
+      setVolume: (volume) => set({ volume: Math.max(0, Math.min(MAX_VOLUME, volume)) }),
     }),
-    { name: 'ascendit-sound', partialize: (s) => ({ enabled: s.enabled, volume: s.volume }) },
+    { name: 'ascendit-sound', storage: safeLocalStorage, partialize: (s) => ({ enabled: s.enabled, volume: s.volume }) },
   ),
 )
 

@@ -31,21 +31,36 @@ export default async function ProductPage({ params }: Props) {
       <JsonLd data={breadcrumbs([{ name: 'Products', path: '/products' }, { name: p.name, path: `/products/${p.slug}` }])} />
 
       <header className="grid gap-8 border-b border-hairline px-6 py-12 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:py-16">
-        <div className="grid content-start gap-5">
-          <AppIcon glyph={p.glyph} accent={p.accent} className="size-20 text-[22px]" />
-          <h1 className="display text-[52px] text-ink sm:text-[72px]">{p.name}</h1>
-          <p className="max-w-[48ch] text-[19px] leading-relaxed text-ink/85">{p.pitch}</p>
-          <p className="text-[15px] text-graphite">For {p.audience.charAt(0).toLowerCase() + p.audience.slice(1)}</p>
-          <div className="flex flex-wrap gap-3">
-            <a href="#demo" className="btn-aqua h-12 px-7 text-[16px]">Book a demo</a>
-            <a href="#plans" className="btn-ghost h-12">See plans</a>
+        {/* Under 1024px this column becomes an app-store header: icon left, name, one-liner, Book a demo. */}
+        <div className="grid content-start gap-5 max-lg:grid-cols-[96px_1fr] max-lg:items-center max-lg:gap-x-4 max-lg:gap-y-2">
+          <span className="max-lg:row-span-2"><AppIcon glyph={p.glyph} accent={p.accent} className="size-20 text-[22px] max-lg:size-24" /></span>
+          <h1 className="display text-[52px] text-ink sm:text-[72px] max-lg:self-end">{p.name}</h1>
+          <p className="max-w-[48ch] text-[19px] leading-relaxed text-ink/85 max-lg:col-start-2 max-lg:self-start max-lg:text-[15px] max-lg:leading-snug">{p.pitch}</p>
+          <p className="text-[15px] text-graphite max-lg:col-span-2">For {p.audience.charAt(0).toLowerCase() + p.audience.slice(1)}</p>
+          <div className="flex flex-wrap gap-3 max-lg:col-span-2">
+            <a href="#demo" className="btn-aqua h-12 px-7 text-[16px] max-lg:flex-1">Book a demo</a>
+            <a href="#plans" className="btn-ghost h-12 max-lg:flex-1">See plans</a>
           </div>
         </div>
-        <div className="overflow-hidden rounded-window border border-hairline shadow-window">
+        <div className="overflow-hidden rounded-window border border-hairline shadow-window max-lg:hidden">
           <div className="flex h-9 items-center justify-center border-b border-hairline bg-paper font-mono text-[13px] text-graphite">screen-recording.mov</div>
           <div className="aspect-[4/3]"><LoopVideo video={p.screenRecording} label={`${p.name} screen recording`} /></div>
         </div>
       </header>
+
+      {/* Phone/tablet: screen-recording carousel, app-store style. */}
+      <section aria-label={`${p.name} screens`} className="lg:hidden">
+        <ul tabIndex={0} aria-label="Screen recordings, swipe for more" className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-1">
+          {['Home', 'Checkout', 'Reports'].map((screen, i) => (
+            <li key={screen} className="w-[58%] shrink-0 snap-start overflow-hidden rounded-[20px] border border-hairline md:w-[32%]">
+              <div className="relative aspect-[9/16]">
+                <LoopVideo video={i === 0 ? p.screenRecording : null} label={`${p.name}: ${screen}`} />
+                <span className="absolute left-2 top-2 rounded-pill bg-window/90 px-2 py-0.5 font-mono text-[11px] text-ink">{p.slug}-{screen.toLowerCase()}.mp4</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section aria-labelledby="features" className="border-b border-hairline px-6 py-12 sm:px-10">
         <h2 id="features" className="display mb-8 text-[40px] text-ink">What it does</h2>

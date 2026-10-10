@@ -2,15 +2,18 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { accentBg } from '@/lib/pillars'
 import type { Accent } from '@/lib/types'
+import { AppNavBar } from '@/phone/AppNavBar'
 
 /** Every page is a window opened full size: same chrome as the desktop, server-rendered, no motion needed. */
 export function PageWindow({
   file, crumbs = [], accent, children, wide = false,
 }: { file: string; crumbs?: { label: string; href: string }[]; accent?: Accent; children: ReactNode; wide?: boolean }) {
   return (
-    <div className={`mx-auto px-3 pt-4 sm:px-4 lg:px-6 lg:pt-6 ${wide ? 'max-w-[1536px]' : 'max-w-[1280px]'}`}>
-      <div className="overflow-hidden rounded-window border border-hairline bg-window shadow-window">
-        <div className="relative flex h-10 items-center gap-1.5 border-b border-hairline bg-gradient-to-b from-white to-paper/60 px-3">
+    <div className={`mx-auto px-3 pt-4 sm:px-4 lg:px-6 lg:pt-6 ${wide ? 'max-w-[1536px]' : 'max-w-[1280px]'} max-lg:max-w-[860px] max-lg:pt-0`}>
+      {/* Under 1024px the window becomes an app view: nav bar + stacked 22px cards (styles in globals.css). */}
+      <AppNavBar />
+      <div className="page-window app-cards overflow-hidden rounded-window border border-hairline bg-window shadow-window">
+        <div className="titlebar relative flex h-10 items-center gap-1.5 border-b border-hairline bg-gradient-to-b from-white to-paper/60 px-3">
           <Link href="/" aria-label="Close and go to the desktop" className={`size-3 rounded-full border border-ink/10 ${accent ? accentBg[accent] : 'bg-tangerine'}`} />
           <span aria-hidden className="size-3 rounded-full border border-ink/10 bg-ink/10" />
           <span aria-hidden className="size-3 rounded-full border border-ink/10 bg-aqua" />
