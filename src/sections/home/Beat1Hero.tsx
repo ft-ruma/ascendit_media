@@ -5,31 +5,28 @@ import { Showreel } from '@/os/Showreel'
 import { StartButton } from '@/os/StartButton'
 import { Sticker } from '@/os/Sticker'
 import { Window } from '@/os/Window'
-import type { Settings } from '@/lib/types'
+import { Lines } from '@/lib/lines'
+import type { HomeContent, Settings } from '@/lib/types'
 
-export function Beat1Hero({ settings }: { settings: Settings }) {
+export function Beat1Hero({ settings, hero }: { settings: Settings; hero: HomeContent['hero'] }) {
   return (
     <section aria-labelledby="hero-title" className="relative mx-auto max-w-[1536px] px-4 pt-6 lg:h-[940px] lg:px-6 lg:pt-0">
       <div className="grid gap-4 lg:block">
         <Window title="hello.txt" pos={{ x: '3%', y: '56px', w: '52%' }} bodyClassName="p-6 sm:p-10" reveal={false}>
-          <p className="eyebrow mb-5">Ascendit Media · Nittambuwa, Sri Lanka</p>
+          <p className="eyebrow mb-5">{hero.eyebrow}</p>
           {/* LCP: server-rendered text in Geist/Instrument with size-adjusted fallbacks. */}
           <h1 id="hero-title" className="display text-[52px] text-ink sm:text-[76px] xl:text-[92px]">
-            We design the store,
-            <br />
-            build the system,
-            <br />
-            and launch the brand.
+            <Lines text={hero.headline} />
           </h1>
           <p className="mt-6 max-w-[46ch] text-[18px] leading-relaxed text-ink/85">
-            Retail interiors, POS and custom software, websites and launch content. One studio, one team, from the floor plan to the first sale.
+            {hero.intro}
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <StartButton source="hero" className="btn-aqua h-12 px-7 text-[16px]">
-              Start a project
+              {hero.primaryCta}
             </StartButton>
             <a href="/work" className="btn-ghost h-12 px-6 text-[16px]">
-              See the work
+              {hero.secondaryCta}
             </a>
           </div>
         </Window>
@@ -39,8 +36,8 @@ export function Beat1Hero({ settings }: { settings: Settings }) {
         </Window>
 
         <Window title="messages" pos={{ x: '62%', y: '470px', w: '31%', r: -1 }} bodyClassName="grid gap-3 p-5" delay={0.3}>
-          <ChatBubble text="Can you design my shop and set up the POS too?" meta="Client · 9:41" />
-          <ChatBubble from="us" text="Yes. And the website, and the launch reels." meta="Ascendit · 9:42" />
+          <ChatBubble text={hero.askBubble} meta="Client · 9:41" />
+          <ChatBubble from="us" text={hero.replyBubble} meta="Ascendit · 9:42" />
         </Window>
       </div>
 
@@ -55,7 +52,7 @@ export function Beat1Hero({ settings }: { settings: Settings }) {
           {settings.stats.clients}+ clients
         </Sticker>
         <Sticker accent="tangerine" variant="seal" rotate={10} className="absolute left-[50%] top-[86px] z-20">
-          Made in Sri Lanka
+          {hero.seal}
         </Sticker>
         <Doodle shape="arrow" className="absolute left-[55%] top-[640px] w-24 rotate-[160deg] text-ink/50" delay={1.6} />
       </div>

@@ -17,7 +17,9 @@
     "migrate:create": "payload migrate:create",
     "migrate": "payload migrate",
     "seed": "payload run scripts/seed.ts",
-    "n8n:score": "node scripts/build-n8n-scorer.mjs"
+    "n8n:score": "node scripts/build-n8n-scorer.mjs",
+    "db": "node scripts/local-db.mjs",
+    "dev:cms": "node scripts/local-db.mjs --with-dev"
   },
   "engines": {
     "node": ">=20.9"
@@ -48,6 +50,7 @@
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "embedded-postgres": "18.4.0-beta.17",
     "sass": "^1.105.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
@@ -57,7 +60,12 @@
     "onlyBuiltDependencies": [
       "sharp",
       "esbuild",
-      "@parcel/watcher"
+      "@parcel/watcher",
+      "@embedded-postgres/darwin-arm64",
+      "@embedded-postgres/darwin-x64",
+      "@embedded-postgres/linux-x64",
+      "@embedded-postgres/linux-arm64",
+      "@embedded-postgres/windows-x64"
     ]
   },
   "packageManager": "pnpm@10.30.0"

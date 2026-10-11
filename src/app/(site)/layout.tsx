@@ -42,7 +42,7 @@ export const viewport: Viewport = { themeColor: '#F4F4F1', colorScheme: 'light',
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const [settings, products, rateCard, cases, draft] = await Promise.all([getSettings(), getProducts(), getRateCard(), getCaseStudies(), draftMode()])
   const plausible = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN
-  const latest = [...cases].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0]
+  const latest = cases.filter((c) => c.status !== 'in-progress').sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0]
   const lockNotes = [
     ...(latest ? [{ app: 'WORK', tone: 'bg-tangerine text-ink', title: 'New case study', body: `${latest.client}: ${latest.result}` }] : []),
     ...(products[0] ? [{ app: products[0].glyph, tone: 'bg-lilac text-ink', title: `${products[0].name} update`, body: products[0].features[0]?.title ? `${products[0].features[0].title}: ${products[0].features[0].body}` : products[0].pitch }] : []),

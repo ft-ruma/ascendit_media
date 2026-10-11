@@ -3,13 +3,15 @@ import type { RateCard, Settings } from '@/lib/types'
 import { whatsappLink } from '@/lib/whatsapp'
 import { Doodle } from '@/os/Doodle'
 import { Window } from '@/os/Window'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy } from '@/lib/types'
 import { BeatHeader } from '../BeatHeader'
 
-export function Beat8Start({ rateCard, settings }: { rateCard: RateCard; settings: Settings }) {
+export function Beat8Start({ rateCard, settings, copy }: { rateCard: RateCard; settings: Settings; copy: BeatCopy }) {
   return (
     <section aria-labelledby="beat-start" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:mt-32 lg:px-6">
-      <BeatHeader n={8} id="beat-start" eyebrow="Start" title={<>Get a price<br />in two minutes.</>}>
-        Six short questions, a live estimate in LKR or USD, and a reply within a working day.
+      <BeatHeader n={9} id="beat-start" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
       </BeatHeader>
       <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         <Window title="new-project.brief" bodyClassName="p-0" draggable={false}>

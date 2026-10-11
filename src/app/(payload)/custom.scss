@@ -1,4 +1,16 @@
-// Ascendit accent in the admin.
+// Ascendit look for the admin: Paper canvas, Aqua accents, Geist where available.
 :root {
   --theme-success-500: #2E7BFF;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --style-radius-s: 8px;
+  --style-radius-m: 12px;
+}
+html[data-theme='light'] {
+  --theme-bg: #F4F4F1;
+  --theme-elevation-0: #F4F4F1;
+  --theme-input-bg: #FFFFFF;
+}
+.btn--style-primary {
+  background: linear-gradient(#4A8BFF, #1F5FE0);
+  border-radius: 999px;
 }

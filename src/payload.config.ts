@@ -16,6 +16,7 @@ import { RateCard } from './collections/RateCard'
 import { Team } from './collections/Team'
 import { Testimonials } from './collections/Testimonials'
 import { Users } from './collections/Users'
+import { Home } from './globals/Home'
 import { Pricing } from './globals/Pricing'
 import { Settings } from './globals/Settings'
 
@@ -27,7 +28,11 @@ export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SITE_URL,
   admin: {
     user: Users.slug,
-    meta: { titleSuffix: ' · Ascendit OS' },
+    meta: { titleSuffix: ' · Ascendit OS', icons: [{ rel: 'icon', type: 'image/svg+xml', url: '/icon.svg' }] },
+    components: {
+      graphics: { Logo: '/admin-ui/Logo#Logo', Icon: '/admin-ui/Logo#Icon' },
+      beforeDashboard: ['/admin-ui/Welcome#Welcome'],
+    },
     livePreview: {
       breakpoints: [
         { label: 'Phone', name: 'phone', width: 390, height: 844 },
@@ -37,7 +42,7 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
   },
   collections: [Pillars, CaseStudies, Products, RateCard, Testimonials, Team, Careers, Pages, Media, Users, LeadOutbox],
-  globals: [Settings, Pricing],
+  globals: [Home, Settings, Pricing],
   editor: lexicalEditor(),
   db: postgresAdapter({
     // Own schema in the CRM's Supabase Postgres; the payload role has no grants on CRM tables.

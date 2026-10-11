@@ -11,6 +11,16 @@ export const Users: CollectionConfig = {
     update: ({ req, id }) => hasRole(req.user as never, 'admin') || req.user?.id === id,
     delete: admins,
   },
+  hooks: {
+    // The very first account (created on the /admin welcome screen) is always an admin.
+    beforeChange: [
+      async ({ data, operation, req }) => {
+        if (operation !== 'create') return data
+        const { totalDocs } = await req.payload.count({ collection: 'users', overrideAccess: true })
+        return totalDocs === 0 ? { ...data, roles: ['admin'] } : data
+      },
+    ],
+  },
   fields: [
     { name: 'name', type: 'text' },
     {

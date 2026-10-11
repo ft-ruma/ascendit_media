@@ -2,15 +2,17 @@ import Link from 'next/link'
 import type { Product } from '@/lib/types'
 import { Price } from '@/os/Price'
 import { StartButton } from '@/os/StartButton'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy } from '@/lib/types'
 import { BeatHeader } from '../BeatHeader'
 import { DockLift } from './DockLift'
 
 /** Beat 4: the dock's product icons lift up into full windows. */
-export function Beat4Products({ products }: { products: Product[] }) {
+export function Beat4Products({ products, copy }: { products: Product[]; copy: BeatCopy }) {
   return (
     <section aria-labelledby="beat-products" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:mt-32 lg:px-6">
-      <BeatHeader n={4} id="beat-products" eyebrow="Products" title={<>Software we run<br />our clients on.</>}>
-        Three apps we built for Sri Lankan businesses, priced monthly, set up by the people who made them.
+      <BeatHeader n={4} id="beat-products" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
       </BeatHeader>
       <ul className="grid gap-4 lg:grid-cols-3">
         {products.map((p, i) => {

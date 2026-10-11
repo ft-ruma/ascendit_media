@@ -103,11 +103,18 @@ export default async function ServicePage({ params }: Props) {
         <section aria-labelledby="renders" className="border-b border-hairline px-6 py-12 sm:px-10">
           <h2 id="renders" className="display mb-8 text-[40px] text-ink">Render gallery</h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {['Grocery flagship, entrance', 'Pharmacy counter', 'Boutique fitting area', 'Hardware aisle', 'Café counter', 'Mall kiosk'].map((l, i) => (
-              <li key={l} className={`overflow-hidden rounded-xl border border-hairline ${i === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}>
-                <div className={i === 0 ? 'aspect-square sm:aspect-auto sm:h-full' : 'aspect-[4/3]'}><Footage label={l} tone={i % 2 ? 'paper' : 'plaster'} /></div>
-              </li>
-            ))}
+            {p.renders?.length
+              ? p.renders.map((r, i) => (
+                  <li key={r.url} className={`overflow-hidden rounded-xl border border-hairline ${i === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={r.url} alt={r.alt} loading="lazy" className={`w-full object-cover ${i === 0 ? 'aspect-square sm:aspect-auto sm:h-full' : 'aspect-[4/3]'}`} />
+                  </li>
+                ))
+              : ['Grocery flagship, entrance', 'Pharmacy counter', 'Boutique fitting area', 'Hardware aisle', 'Café counter', 'Mall kiosk'].map((l, i) => (
+                  <li key={l} className={`overflow-hidden rounded-xl border border-hairline ${i === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}>
+                    <div className={i === 0 ? 'aspect-square sm:aspect-auto sm:h-full' : 'aspect-[4/3]'}><Footage label={l} tone={i % 2 ? 'paper' : 'plaster'} /></div>
+                  </li>
+                ))}
           </ul>
         </section>
       )}

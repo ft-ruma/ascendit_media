@@ -1,5 +1,7 @@
 import { AppIcon } from '@/os/AppIcon'
 import { Footage } from '@/os/Footage'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy } from '@/lib/types'
 import { BeatHeader } from '../BeatHeader'
 import { StoreToSystemPin } from './StoreToSystemPin'
 
@@ -11,15 +13,16 @@ const STEPS = [
 ]
 
 /** Beat 3: the only GSAP ScrollTrigger on the page. Pins the row while the four windows open in sequence. */
-export function Beat3StoreToSystem() {
+export function Beat3StoreToSystem({ copy, steps }: { copy: BeatCopy; steps: { file: string; title: string; body: string }[] }) {
+  const items = STEPS.map((s, i) => ({ ...s, ...(steps[i] ?? {}) }))
   return (
     <section aria-labelledby="beat-s2s" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:px-6">
       <StoreToSystemPin>
-        <BeatHeader n={3} id="beat-s2s" eyebrow="Store to System" title={<>From floor plan<br />to first sale.</>}>
-          Pick two or more and the bundle saving applies automatically in the project builder.
-        </BeatHeader>
+        <BeatHeader n={3} id="beat-s2s" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
+      </BeatHeader>
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s) => (
+          {items.map((s) => (
             <li key={s.n} data-s2s-window className="overflow-hidden rounded-window border border-hairline bg-window shadow-window">
               <div className="flex h-10 items-center gap-1.5 border-b border-hairline bg-gradient-to-b from-white to-paper/60 px-3">
                 <span aria-hidden className="size-3 rounded-full border border-ink/10 bg-ink/10" />

@@ -8,7 +8,7 @@ export const Pillars: CollectionConfig = {
   admin: { useAsTitle: 'name', group: 'Services', defaultColumns: ['name', 'slug', 'fromPriceLKR', 'fromPriceUSD'] },
   access: { read: anyone, create: editors, update: editors, delete: editors },
   hooks: {
-    afterChange: [({ doc }) => revalidate(['/', `/services/${doc.slug}`, '/start'])],
+    afterChange: [({ doc }) => revalidate(['/', `/services/${doc.slug}`, '/start', '/photos'])],
   },
   fields: [
     { name: 'key', type: 'select', required: true, unique: true, options: PILLAR_OPTIONS, admin: { position: 'sidebar' } },
@@ -35,6 +35,13 @@ export const Pillars: CollectionConfig = {
         { name: 'fromPriceLKR', type: 'number', required: true, access: { update: pricingField } },
         { name: 'fromPriceUSD', type: 'number', required: true, access: { update: pricingField } },
       ],
+    },
+    {
+      name: 'renders',
+      type: 'upload',
+      relationTo: 'media',
+      hasMany: true,
+      admin: { description: 'Render gallery for this service (retail page gallery and the Photos app).' },
     },
     seoGroup,
   ],

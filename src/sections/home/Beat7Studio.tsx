@@ -3,12 +3,16 @@ import type { Settings, TeamMember } from '@/lib/types'
 import { LoopVideo } from '@/os/LoopVideo'
 import { Sticker } from '@/os/Sticker'
 import { Window } from '@/os/Window'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy } from '@/lib/types'
 import { BeatHeader } from '../BeatHeader'
 
-export function Beat7Studio({ settings, team }: { settings: Settings; team: TeamMember[] }) {
+export function Beat7Studio({ settings, team, copy }: { settings: Settings; team: TeamMember[]; copy: BeatCopy }) {
   return (
     <section aria-labelledby="beat-studio" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:mt-32 lg:px-6">
-      <BeatHeader n={7} id="beat-studio" eyebrow="Studio" title={<>Small team.<br />Whole system.</>} />
+      <BeatHeader n={8} id="beat-studio" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
+      </BeatHeader>
       <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
         <Window title="founder-note.txt" href="/studio" bodyClassName="p-6 sm:p-8">
           <blockquote className="display text-[30px] leading-[1.15] text-ink sm:text-[36px]">“{settings.founderNote.quote}”</blockquote>

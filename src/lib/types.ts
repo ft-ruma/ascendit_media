@@ -29,6 +29,8 @@ export type Pillar = {
   tools: string[]
   fromPriceLKR: number
   fromPriceUSD: number
+  /** render / photo gallery (retail page, Photos app) */
+  renders?: NonNullable<Media>[]
   seo?: Seo
 }
 
@@ -58,6 +60,10 @@ export type CaseStudy = {
   windowFileName: string
   featured: boolean
   publishedAt: string
+  /** in-progress projects show as "Now building"; completed ones are case studies */
+  status: 'completed' | 'in-progress'
+  progress?: string | null
+  expectedLaunch?: string | null
   seo?: Seo
 }
 
@@ -140,4 +146,16 @@ export type LegalPage = {
   title: string
   updated: string
   body: string[] | Record<string, unknown>
+}
+
+export type BeatCopy = { eyebrow: string; title: string; intro?: string | null }
+
+/** Home page copy (Payload global "home"). Titles use line breaks where the desktop breaks lines. */
+export type HomeContent = {
+  hero: { eyebrow: string; headline: string; intro: string; primaryCta: string; secondaryCta: string; seal: string; askBubble: string; replyBubble: string }
+  phoneHero: { headline: string; accent: string; intro: string }
+  beats: Record<'services' | 'storeToSystem' | 'products' | 'work' | 'proof' | 'studio' | 'start', BeatCopy>
+  storeToSystem: { file: string; title: string; body: string }[]
+  nowBuilding: { title: string; intro: string }
+  network: BeatCopy & { universeAt: number }
 }

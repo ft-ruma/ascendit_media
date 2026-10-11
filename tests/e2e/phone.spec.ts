@@ -39,7 +39,7 @@ for (const width of [375, 390, 430]) {
       await skipBoot(page)
       await page.goto('/')
       const apps = page.getByRole('navigation', { name: 'Apps' })
-      for (const [name, path] of [['Work', '/work'], ['POS', '/products/pos'], ['Notes', '/notes'], ['Photos', '/photos'], ['Messages', '/messages'], ['Studio', '/studio'], ['Careers', '/careers'], ['Contact', '/contact']] as const) {
+      for (const [name, path] of [['Work', '/work'], ['POS', '/products/pos'], ['Notes', '/notes'], ['Photos', '/photos'], ['Messages', '/messages'], ['Studio', '/studio'], ['Careers', '/careers'], ['Contact', '/contact'], ['Network', '/network']] as const) {
         await expect(apps.getByRole('link', { name, exact: true })).toHaveAttribute('href', path)
       }
       await apps.getByRole('button', { name: 'Services' }).tap()

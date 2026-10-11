@@ -11,6 +11,8 @@ export function WorkIndex({ cases, industries }: { cases: CaseStudy[]; industrie
   const service = sp.get('service')
   const industry = sp.get('industry')
   const where = sp.get('where')
+  const status = sp.get('status')
+  const hasBuilding = cases.some((c) => c.status === 'in-progress')
 
   const set = (k: string, v: string | null) => {
     const next = new URLSearchParams(sp)
@@ -20,7 +22,7 @@ export function WorkIndex({ cases, industries }: { cases: CaseStudy[]; industrie
   }
 
   const list = cases.filter(
-    (c) => (!service || c.pillars.includes(service as PillarKey)) && (!industry || c.industry === industry) && (!where || c.location === where),
+    (c) => (!service || c.pillars.includes(service as PillarKey)) && (!industry || c.industry === industry) && (!where || c.location === where) && (!status || c.status === status),
   )
 
   return (
@@ -29,6 +31,7 @@ export function WorkIndex({ cases, industries }: { cases: CaseStudy[]; industrie
         <FilterRow label="Service" value={service} onChange={(v) => set('service', v)} options={(Object.keys(PILLAR_NAMES) as PillarKey[]).map((k) => [k, PILLAR_NAMES[k]])} />
         <FilterRow label="Industry" value={industry} onChange={(v) => set('industry', v)} options={industries.map((i) => [i, i])} />
         <FilterRow label="Where" value={where} onChange={(v) => set('where', v)} options={[['LK', 'Sri Lanka'], ['intl', 'International']]} />
+        {hasBuilding && <FilterRow label="Status" value={status} onChange={(v) => set('status', v)} options={[['in-progress', 'In progress'], ['completed', 'Completed']]} />}
       </div>
       <p className="sr-only" aria-live="polite">{list.length} case studies</p>
       {list.length ? <CaseGrid cases={list} /> : <p className="py-16 text-center text-[17px] text-graphite">Nothing matches yet. Try fewer filters.</p>}

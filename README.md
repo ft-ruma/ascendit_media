@@ -11,18 +11,38 @@ pnpm install
 pnpm dev            # http://localhost:3000, runs on built-in seed content, no database needed
 ```
 
-With the CMS:
+With the CMS and admin panel (no Docker needed):
 
 ```bash
-docker compose up -d                       # local Postgres
-cp .env.example .env                       # set DATABASE_URI and PAYLOAD_SECRET
-SEED_ADMIN_EMAIL=you@ascendit.dev SEED_ADMIN_PASSWORD=... pnpm seed
-pnpm dev                                   # /admin to sign in
+cp .env.example .env        # set PAYLOAD_SECRET to a long random string
+pnpm dev:cms                # starts a local Postgres (.local-db/) and the site
+pnpm seed                   # first time only: copies the launch content into the CMS
 ```
+
+Open http://localhost:3000/admin and create your account: the first account is always an
+admin. (`pnpm db` runs just the database; `docker compose up -d` also works.)
 
 Without `DATABASE_URI` every page renders from `src/seed/data.ts`. With it, pages read
 Payload's local API; if the database errors, pages fall back to seed so the public
 site never goes down.
+
+## Admin panel (`/admin`)
+
+The dashboard has quick actions, live counts (projects in progress, case studies, products,
+open jobs, leads waiting in the outbox) and a one-page editor guide. What editors manage:
+
+| Area | Where in the admin | Shows on |
+| --- | --- | --- |
+| Projects: case studies and work **in progress** (status, progress note, launch month) | Content → Case Studies | /work, case pages, home Work section + "Now building", phone home |
+| Every home-page headline, section title, Store to System steps, phone hero | Content → Home page | / (desktop and phone) |
+| Services: copy, capabilities, process, tools, "from" prices, **render gallery** | Services → Pillars | /services/*, /photos |
+| Products and plans | Products → Products | /products/*, dock, builder |
+| Prices for the builder estimate | Pricing → Rate card, Estimate settings | builder, /start |
+| Testimonials, team, jobs, legal pages, media | Content / Studio | /studio, /messages, /careers, /legal/* |
+| WhatsApp, email, phone, socials, office, stats, founder note | Studio → Settings | menu bar, dock, footer, contact, lock screen |
+| People and roles (admin, editor, pricing) | Admin → Users | |
+
+Publishing refreshes only the affected pages, so changes are live in seconds without a deploy.
 
 ## Commands
 
@@ -33,6 +53,7 @@ site never goes down.
 | `pnpm test` | Vitest: estimate, scoring, schemas, HMAC, rate limit |
 | `pnpm test:e2e` | Playwright + axe, desktop and phone (`PW_CHANNEL=chrome` to use installed Chrome) |
 | `pnpm size` | Fails if a public route ships over 200 KB first-load JS (run after build) |
+| `pnpm dev:cms` / `pnpm db` | Local Postgres (embedded, no Docker) with or without the dev server |
 | `pnpm seed` | Copy seed content into Payload (idempotent) |
 | `pnpm migrate:create <name>` / `pnpm migrate` | Payload migrations (committed; production never pushes schema) |
 | `pnpm generate:types` / `generate:importmap` | After changing collections |
@@ -57,6 +78,28 @@ src/
 n8n/                   lead-intake workflow notes, HMAC verify node, generated scorer
 supabase/cms-role.sql  cms schema + payload role with no CRM grants
 ```
+
+## Project network (`/network`, home section 06, phone widget)
+
+Every case study, completed or in progress, is a glowing node in a 3D neural brain: two
+hemispheres with a folded cortex (thousands of particles, rim-lit), lobes, cerebellum and
+brainstem, with signals travelling along connections and neurons firing where they land. It turns
+slowly; drag to turn it. Tap a node (or pick a project from the list under it) to see the client,
+services, result, progress and a link to the case study. Node colour is the service; a pulsing
+ring means in progress.
+
+Growth is the point: the oldest project sits at the core and each new one connects further out.
+When the count reaches the threshold (Home page → Network → "Becomes a universe at", default 100)
+the brain turns into a spiral galaxy and every project becomes a star, with trails along the arms
+in date order. Positions are deterministic: adding a project never moves the existing ones.
+
+Previews (add to the URL of `/` or `/network`): `?network=universe`, `?network=brain`, and
+`?network=grow:60` to fill the network with placeholder nodes and see it at 60 projects.
+
+Code: `src/network/geometry.ts` (pure 3D layout, unit-tested), `ProjectNetwork.tsx` (2D canvas with its own
+3D projection, additive glow and bloom, no WebGL or 3D library; animates
+only while on screen, still frame under reduced motion; the project list is the keyboard and
+screen-reader interface). On the home page it loads after first paint to stay inside the JS budget.
 
 ## Phone and tablet edition
 

@@ -1,4 +1,4 @@
-import { getCaseStudies } from '@/lib/cms'
+import { getCaseStudies, getPillars } from '@/lib/cms'
 import { pageMeta } from '@/lib/seo'
 import { Photos, type Photo } from '@/phone/Photos'
 import { PageHero, PageWindow } from '@/sections/PageWindow'
@@ -16,12 +16,14 @@ const RENDERS = [
 ]
 
 export default async function PhotosPage() {
-  const cases = await getCaseStudies()
+  const [cases, pillars] = await Promise.all([getCaseStudies(), getPillars()])
+  const renders: Photo[] = pillars.flatMap((p) => (p.renders ?? []).map((r) => ({ src: r.url, alt: r.alt, caption: `${p.name}: ${r.alt}` })))
   const fromCases: Photo[] = cases.flatMap((c) => [
     ...(c.cover?.url ? [{ src: c.cover.url, alt: c.cover.alt, caption: `${c.client}` }] : []),
     ...c.gallery.map((g) => ({ src: g.url, alt: g.alt, caption: c.client })),
   ])
-  const photos: Photo[] = [...fromCases, ...RENDERS.map((r) => ({ alt: r, caption: `${r} (D5 render)` }))]
+  // Placeholder slates only until real renders are uploaded to a service in the CMS.
+  const photos: Photo[] = renders.length ? [...renders, ...fromCases] : [...fromCases, ...RENDERS.map((r) => ({ alt: r, caption: `${r} (D5 render)` }))]
   return (
     <PageWindow file="Photos">
       <PageHero eyebrow="Photos" title="Photos" intro="Renders and finished stores. Tap to open, pinch to zoom, swipe for the next one." />

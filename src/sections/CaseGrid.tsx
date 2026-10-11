@@ -13,6 +13,7 @@ export function CaseGrid({ cases }: { cases: CaseStudy[] }) {
             <div className="aspect-[16/10]"><LoopVideo video={c.cover} label={`${c.client}: ${c.industry}`} /></div>
             <div className="grid gap-2 p-5">
               <p className="text-[13px] text-graphite">{c.pillars.map((p) => PILLAR_NAMES[p]).join(' · ')} · {c.location === 'LK' ? 'Sri Lanka' : 'International'}</p>
+              {c.status === 'in-progress' && <p className="w-fit rounded-pill bg-tangerine/25 px-2.5 py-0.5 text-[13px] font-medium text-ink">In progress{c.progress ? `: ${c.progress}` : ''}</p>}
               <h3 className="text-[20px] font-semibold tracking-tight text-ink group-hover:underline underline-offset-4">{c.client}</h3>
               <p className="text-[15px] text-ink/80">{c.result}</p>
             </div>

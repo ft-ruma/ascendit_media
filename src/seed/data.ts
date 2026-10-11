@@ -2,7 +2,7 @@
 // and `pnpm seed` copies it into Payload. Client names, quotes and prices are
 // placeholders until Ascendit supplies the real ones (Sprint 5 gate).
 import type {
-  Career, CaseStudy, LegalPage, Pillar, Pricing, Product, RateCardEntry, Settings, TeamMember, Testimonial,
+  Career, CaseStudy, HomeContent, LegalPage, Pillar, Pricing, Product, RateCardEntry, Settings, TeamMember, Testimonial,
 } from '@/lib/types'
 
 export const settings: Settings = {
@@ -191,6 +191,7 @@ export const caseStudies: CaseStudy[] = [
     quote: testimonials[0],
     windowFileName: 'grocer-flagship.case',
     featured: true,
+    status: 'completed',
     publishedAt: '2026-06-01',
   },
   {
@@ -212,6 +213,7 @@ export const caseStudies: CaseStudy[] = [
     quote: testimonials[1],
     windowFileName: 'pharmacy-refit.case',
     featured: true,
+    status: 'completed',
     publishedAt: '2026-04-12',
   },
   {
@@ -234,6 +236,7 @@ export const caseStudies: CaseStudy[] = [
     quote: testimonials[2],
     windowFileName: 'tea-store.case',
     featured: true,
+    status: 'completed',
     publishedAt: '2026-02-20',
   },
   {
@@ -254,6 +257,7 @@ export const caseStudies: CaseStudy[] = [
     gallery: [],
     windowFileName: 'clinic-system.case',
     featured: false,
+    status: 'completed',
     publishedAt: '2025-11-03',
   },
 ]
@@ -455,3 +459,43 @@ export const legalPages: LegalPage[] = [
     ],
   },
 ]
+
+export const home: HomeContent = {
+  hero: {
+    eyebrow: 'Ascendit Media · Nittambuwa, Sri Lanka',
+    headline: 'We design the store,\nbuild the system,\nand launch the brand.',
+    intro: 'Retail interiors, POS and custom software, websites and launch content. One studio, one team, from the floor plan to the first sale.',
+    primaryCta: 'Start a project',
+    secondaryCta: 'See the work',
+    seal: 'Made in Sri Lanka',
+    askBubble: 'Can you design my shop and set up the POS too?',
+    replyBubble: 'Yes. And the website, and the launch reels.',
+  },
+  phoneHero: {
+    headline: 'From the shop floor',
+    accent: 'to the cloud',
+    intro: 'Store design, POS and software, websites and launch content. One studio, one system.',
+  },
+  beats: {
+    services: { eyebrow: 'Services', title: 'Four pillars,\none studio.', intro: 'Most shops hire four companies to open one store. We are all four, so the render, the till, the website and the launch reel all agree.' },
+    storeToSystem: { eyebrow: 'Store to System', title: 'From floor plan\nto first sale.', intro: 'Pick two or more and the bundle saving applies automatically in the project builder.' },
+    products: { eyebrow: 'Products', title: 'Software we run\nour clients on.', intro: 'Three apps we built for Sri Lankan businesses, priced monthly, set up by the people who made them.' },
+    work: { eyebrow: 'Work', title: 'Stores open.\nTills ringing.', intro: null },
+    proof: { eyebrow: 'Proof', title: 'In their\nwords.', intro: null },
+    studio: { eyebrow: 'Studio', title: 'Small team.\nWhole system.', intro: null },
+    start: { eyebrow: 'Start', title: 'Get a price\nin two minutes.', intro: 'Six short questions, a live estimate in LKR or USD, and a reply within a working day.' },
+  },
+  storeToSystem: [
+    { file: 'floor-plan.render', title: 'Design the store', body: 'Layout, fixtures and photoreal renders.' },
+    { file: 'pos.app', title: 'Install the till', body: 'Ascendit POS with your stock loaded.' },
+    { file: 'shop.web', title: 'Open online', body: 'An online store on the same stock.' },
+    { file: 'launch.mov', title: 'Launch it', body: 'Opening-week reels, signage and ads.' },
+  ],
+  nowBuilding: { title: 'Now building', intro: 'Projects on the workbench right now.' },
+  network: {
+    eyebrow: 'Network',
+    title: 'Every project,\na new connection.',
+    intro: 'Each glowing node is a store we designed, a system we built or a brand we launched. When the network passes one hundred projects it becomes a universe, and every project becomes a star.',
+    universeAt: 100,
+  },
+}

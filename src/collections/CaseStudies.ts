@@ -9,7 +9,7 @@ export const CaseStudies: CollectionConfig = {
   admin: {
     useAsTitle: 'client',
     group: 'Content',
-    defaultColumns: ['client', 'industry', 'location', 'featured', '_status'],
+    defaultColumns: ['client', 'projectStatus', 'industry', 'featured', '_status'],
     livePreview: { url: ({ data }) => `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/api/preview?path=/work/${data.slug}&secret=${process.env.PREVIEW_SECRET ?? ''}` },
   },
   versions: { drafts: { autosave: { interval: 800 }, schedulePublish: true }, maxPerDoc: 25 },
@@ -20,7 +20,7 @@ export const CaseStudies: CollectionConfig = {
       async ({ doc, previousDoc }) => {
         if (doc._status !== 'published') return
         const pillars: string[] = doc.pillars ?? []
-        await revalidate(['/', '/work', `/work/${doc.slug}`, ...pillars.map((p) => `/services/${pillarSlug(p)}`)])
+        await revalidate(['/', '/network', '/work', `/work/${doc.slug}`, ...pillars.map((p) => `/services/${pillarSlug(p)}`)])
         if (previousDoc?._status !== 'published') await notifyN8n('case-study.published', doc)
       },
     ],
@@ -81,6 +81,28 @@ export const CaseStudies: CollectionConfig = {
       type: 'text',
       required: true,
       admin: { position: 'sidebar', description: 'Shown in the window title bar, e.g. grocer-flagship.case' },
+    },
+    {
+      name: 'projectStatus',
+      label: 'Status',
+      type: 'select',
+      required: true,
+      defaultValue: 'completed',
+      options: [
+        { label: 'Completed (case study)', value: 'completed' },
+        { label: 'In progress (now building)', value: 'in-progress' },
+      ],
+      admin: { position: 'sidebar', description: 'In-progress projects show under "Now building" with the progress note.' },
+    },
+    {
+      name: 'progress',
+      type: 'text',
+      admin: { position: 'sidebar', condition: (data) => data?.projectStatus === 'in-progress', description: 'e.g. "Fit-out, week 6 of 9"' },
+    },
+    {
+      name: 'expectedLaunch',
+      type: 'date',
+      admin: { position: 'sidebar', condition: (data) => data?.projectStatus === 'in-progress', date: { pickerAppearance: 'monthOnly' } },
     },
     { name: 'featured', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Shows on the home Work beat.' } },
     { name: 'publishedAt', type: 'date', required: true, defaultValue: () => new Date().toISOString(), admin: { position: 'sidebar' } },

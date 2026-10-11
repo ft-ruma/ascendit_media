@@ -70,6 +70,12 @@ export const glyph = {
       <path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17" />
     </svg>
   ),
+  network: (
+    <svg viewBox="0 0 24 24" className="size-8 text-white" fill="none" stroke="currentColor" strokeWidth={1.4}>
+      <path d="M5 8l6-3 7 4-2 7-7 3-5-5zM11 5l1 7 4 4M5 8l7 4-7 2M12 12l6-3" opacity=".7" />
+      {[[5, 8], [11, 5], [18, 9], [16, 16], [9, 19], [4, 14], [12, 12]].map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill="currentColor" stroke="none" />)}
+    </svg>
+  ),
   brand: (
     <svg viewBox="0 0 24 24" className="size-7 text-ink" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinejoin="round">
       <path d="M12 3.5l2.4 5 5.6.8-4 3.9.9 5.6-4.9-2.7-4.9 2.7.9-5.6-4-3.9 5.6-.8z" />
@@ -89,4 +95,5 @@ export const tiles = {
   software: 'bg-gradient-to-b from-[#E4DBFF] to-lilac',
   web: 'bg-gradient-to-b from-[#8EC5FF] to-aqua-deep',
   brand: 'bg-gradient-to-b from-[#E9FFB0] to-lime',
+  network: 'bg-[radial-gradient(circle_at_50%_40%,#1F5FE0,#0B1D45_70%,#0E0E12)]',
 } as const

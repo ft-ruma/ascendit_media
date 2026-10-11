@@ -3,7 +3,7 @@ import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import * as seed from '@/seed/data'
 import type {
-  CaseStudy, Career, LegalPage, Media, Pillar, PillarKey, Pricing, Product, RateCard, RateCardEntry, Settings,
+  CaseStudy, Career, HomeContent, LegalPage, Media, Pillar, PillarKey, Pricing, Product, RateCard, RateCardEntry, Settings,
   TeamMember, Testimonial,
 } from './types'
 
@@ -67,6 +67,7 @@ const toPillar = (d: Doc): Pillar => ({
   capabilities: items(d.capabilities),
   process: (d.process ?? []).map((p: Doc) => ({ title: p.title, body: p.body })),
   tools: items(d.tools),
+  renders: (d.renders ?? []).map(media).filter(Boolean),
   fromPriceLKR: d.fromPriceLKR,
   fromPriceUSD: d.fromPriceUSD,
   seo: seo(d),
@@ -97,6 +98,9 @@ const toCaseStudy = (d: Doc): CaseStudy => ({
   cover: media(d.cover),
   windowFileName: d.windowFileName,
   featured: !!d.featured,
+  status: d.projectStatus === 'in-progress' ? 'in-progress' : 'completed',
+  progress: d.progress,
+  expectedLaunch: d.expectedLaunch,
   publishedAt: d.publishedAt,
   seo: seo(d),
 })
@@ -207,7 +211,7 @@ export const getTestimonials = cache(() =>
   fromCms(
     'testimonials',
     async () => {
-      const { docs } = await (await getPayloadClient()).find({ collection: 'testimonials', limit: 50, depth: 1 })
+      const { docs } = await (await getPayloadClient()).find({ collection: 'testimonials', limit: 50, depth: 1, sort: 'createdAt' })
       return (docs as Doc[]).map(toTestimonial)
     },
     () => seed.testimonials,
@@ -229,7 +233,7 @@ export const getCareers = cache(() =>
   fromCms<Career[]>(
     'careers',
     async () => {
-      const { docs } = await (await getPayloadClient()).find({ collection: 'careers', limit: 50, where: { open: { equals: true } } })
+      const { docs } = await (await getPayloadClient()).find({ collection: 'careers', limit: 50, sort: 'createdAt', where: { open: { equals: true } } })
       return (docs as Doc[]).map((d) => ({
         slug: d.slug,
         title: d.title,
@@ -292,3 +296,26 @@ export const getRateCard = cache(async (): Promise<RateCard> => {
     products: Object.fromEntries(products.filter((p) => p.plans[0]).map((p) => [p.slug, { name: p.name, plan: p.plans[0] }])),
   }
 })
+
+/** Home page copy; any field left empty in the CMS falls back to the launch copy. */
+export const getHome = cache(() =>
+  fromCms<HomeContent>(
+    'home',
+    async () => {
+      const d = (await (await getPayloadClient()).findGlobal({ slug: 'home' })) as Doc
+      const pick = <T extends Record<string, unknown>>(cms: Doc | undefined, base: T): T =>
+        Object.fromEntries(Object.entries(base).map(([k, v]) => [k, cms?.[k] || v])) as T
+      return {
+        hero: pick(d.hero, seed.home.hero),
+        phoneHero: pick(d.phoneHero, seed.home.phoneHero),
+        beats: Object.fromEntries(
+          Object.entries(seed.home.beats).map(([k, v]) => [k, { ...pick(d.beats?.[k], v), intro: d.beats?.[k] ? d.beats[k].intro ?? null : v.intro }]),
+        ) as HomeContent['beats'],
+        storeToSystem: d.storeToSystem?.length === 4 ? d.storeToSystem.map((s: Doc) => ({ file: s.file, title: s.title, body: s.body })) : seed.home.storeToSystem,
+        nowBuilding: pick(d.nowBuilding, seed.home.nowBuilding),
+        network: { ...pick(d.network, seed.home.network), universeAt: Number(d.network?.universeAt) || seed.home.network.universeAt },
+      }
+    },
+    () => seed.home,
+  ),
+)

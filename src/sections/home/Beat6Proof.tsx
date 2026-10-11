@@ -1,9 +1,11 @@
 import type { Settings, Testimonial } from '@/lib/types'
 import { ChatBubble } from '@/os/ChatBubble'
 import { Window } from '@/os/Window'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy } from '@/lib/types'
 import { BeatHeader } from '../BeatHeader'
 
-export function Beat6Proof({ testimonials, settings }: { testimonials: Testimonial[]; settings: Settings }) {
+export function Beat6Proof({ testimonials, settings, copy }: { testimonials: Testimonial[]; settings: Settings; copy: BeatCopy }) {
   const stats = [
     { v: `${settings.stats.clients}+`, l: 'clients' },
     { v: settings.stats.years, l: 'years' },
@@ -12,7 +14,9 @@ export function Beat6Proof({ testimonials, settings }: { testimonials: Testimoni
   ]
   return (
     <section aria-labelledby="beat-proof" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:mt-32 lg:px-6">
-      <BeatHeader n={6} id="beat-proof" eyebrow="Proof" title={<>In their<br />words.</>} />
+      <BeatHeader n={7} id="beat-proof" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
+      </BeatHeader>
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Window title="messages · clients" bodyClassName="grid gap-5 p-6 sm:p-8">
           {testimonials.slice(0, 3).map((t, i) => (

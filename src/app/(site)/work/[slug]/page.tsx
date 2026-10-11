@@ -37,6 +37,13 @@ export default async function CaseStudyPage({ params }: Props) {
           <p className="eyebrow">
             {c.industry} · {c.location === 'LK' ? 'Sri Lanka' : 'International'}
           </p>
+          {c.status === 'in-progress' && (
+            <p className="inline-flex w-fit items-center gap-2 rounded-pill bg-tangerine/25 px-3 py-1 text-[14px] font-medium text-ink">
+              <span aria-hidden className="size-2 rounded-full bg-tangerine" />
+              In progress{c.progress ? `: ${c.progress}` : ''}
+              {c.expectedLaunch ? ` · launching ${new Date(c.expectedLaunch).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}` : ''}
+            </p>
+          )}
           <h1 className="display max-w-[20ch] text-[46px] text-ink sm:text-[68px]">{c.client}</h1>
           <p className="max-w-[50ch] text-[22px] leading-snug text-ink">{c.result}</p>
           <ul className="flex flex-wrap gap-2">

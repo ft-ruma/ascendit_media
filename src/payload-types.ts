@@ -108,10 +108,12 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    home: Home;
     settings: Setting;
     pricing: Pricing;
   };
   globalsSelect: {
+    home: HomeSelect<false> | HomeSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
     pricing: PricingSelect<false> | PricingSelect<true>;
   };
@@ -189,6 +191,10 @@ export interface Pillar {
     | null;
   fromPriceLKR: number;
   fromPriceUSD: number;
+  /**
+   * Render gallery for this service (retail page gallery and the Photos app).
+   */
+  renders?: (number | Media)[] | null;
   seo?: {
     /**
      * Under 60 characters. Falls back to the page title.
@@ -314,6 +320,15 @@ export interface CaseStudy {
    * Shown in the window title bar, e.g. grocer-flagship.case
    */
   windowFileName: string;
+  /**
+   * In-progress projects show under "Now building" with the progress note.
+   */
+  projectStatus: 'completed' | 'in-progress';
+  /**
+   * e.g. "Fit-out, week 6 of 9"
+   */
+  progress?: string | null;
+  expectedLaunch?: string | null;
   /**
    * Shows on the home Work beat.
    */
@@ -806,6 +821,7 @@ export interface PillarsSelect<T extends boolean = true> {
       };
   fromPriceLKR?: T;
   fromPriceUSD?: T;
+  renders?: T;
   seo?:
     | T
     | {
@@ -849,6 +865,9 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   video?: T;
   quote?: T;
   windowFileName?: T;
+  projectStatus?: T;
+  progress?: T;
+  expectedLaunch?: T;
   featured?: T;
   publishedAt?: T;
   seo?:
@@ -1161,6 +1180,123 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Headlines and section text on the home page (desktop and phone).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home".
+ */
+export interface Home {
+  id: number;
+  hero: {
+    eyebrow: string;
+    /**
+     * One line per row.
+     */
+    headline: string;
+    intro: string;
+    primaryCta: string;
+    secondaryCta: string;
+    seal: string;
+    askBubble: string;
+    replyBubble: string;
+  };
+  phoneHero: {
+    headline: string;
+    /**
+     * Shown in italic serif after the headline.
+     */
+    accent: string;
+    intro: string;
+  };
+  beats: {
+    services: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+    storeToSystem: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+    products: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+    work: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+    proof: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+    studio: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+    start: {
+      eyebrow: string;
+      /**
+       * Press Enter where the line should break on desktop.
+       */
+      title: string;
+      intro?: string | null;
+    };
+  };
+  /**
+   * The four windows: design, POS, online store, launch.
+   */
+  storeToSystem?:
+    | {
+        /**
+         * File name in the title bar, e.g. pos.app
+         */
+        file: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  network: {
+    eyebrow: string;
+    title: string;
+    intro?: string | null;
+    /**
+     * Preview the universe any time with ?network=universe on the home or /network page.
+     */
+    universeAt: number;
+  };
+  nowBuilding: {
+    title: string;
+    intro: string;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings".
  */
@@ -1174,7 +1310,7 @@ export interface Setting {
   };
   openForProjects?: boolean | null;
   /**
-   * International format, e.g. +94770000000
+   * International format, e.g. +94743662318
    */
   whatsapp: string;
   phone: string;
@@ -1228,6 +1364,109 @@ export interface Pricing {
   roundUSD: number;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_select".
+ */
+export interface HomeSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        eyebrow?: T;
+        headline?: T;
+        intro?: T;
+        primaryCta?: T;
+        secondaryCta?: T;
+        seal?: T;
+        askBubble?: T;
+        replyBubble?: T;
+      };
+  phoneHero?:
+    | T
+    | {
+        headline?: T;
+        accent?: T;
+        intro?: T;
+      };
+  beats?:
+    | T
+    | {
+        services?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+        storeToSystem?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+        products?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+        work?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+        proof?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+        studio?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+        start?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+            };
+      };
+  storeToSystem?:
+    | T
+    | {
+        file?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  network?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        intro?: T;
+        universeAt?: T;
+      };
+  nowBuilding?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

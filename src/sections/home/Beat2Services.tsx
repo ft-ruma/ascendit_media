@@ -4,6 +4,8 @@ import type { Pillar } from '@/lib/types'
 import { Doodle } from '@/os/Doodle'
 import { Price } from '@/os/Price'
 import { Window, type WindowPos } from '@/os/Window'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy } from '@/lib/types'
 import { BeatHeader } from '../BeatHeader'
 
 const POS: WindowPos[] = [
@@ -15,11 +17,11 @@ const POS: WindowPos[] = [
 
 const FILE: Record<string, string> = { retail: 'retail-design.app', software: 'software.app', web: 'web.app', brand: 'brand.app' }
 
-export function Beat2Services({ pillars }: { pillars: Pillar[] }) {
+export function Beat2Services({ pillars, copy }: { pillars: Pillar[]; copy: BeatCopy }) {
   return (
     <section aria-labelledby="beat-services" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:mt-10 lg:px-6">
-      <BeatHeader n={2} id="beat-services" eyebrow="Services" title={<>Four pillars,<br />one studio.</>}>
-        Most shops hire four companies to open one store. We are all four, so the render, the till, the website and the launch reel all agree.
+      <BeatHeader n={2} id="beat-services" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
       </BeatHeader>
       <div className="relative grid gap-4 sm:grid-cols-2 lg:block lg:h-[700px]">
         {pillars.map((p, i) => (

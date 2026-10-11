@@ -4,6 +4,9 @@ import type { CaseStudy } from '@/lib/types'
 import { LoopVideo } from '@/os/LoopVideo'
 import { Sticker } from '@/os/Sticker'
 import { Window, type WindowPos } from '@/os/Window'
+import { Lines } from '@/lib/lines'
+import type { BeatCopy, HomeContent } from '@/lib/types'
+import { NowBuilding } from '../NowBuilding'
 import { BeatHeader } from '../BeatHeader'
 
 const POS: WindowPos[] = [
@@ -12,10 +15,12 @@ const POS: WindowPos[] = [
   { x: '22%', y: '700px', w: '46%', r: -0.8 },
 ]
 
-export function Beat5Work({ cases }: { cases: CaseStudy[] }) {
+export function Beat5Work({ cases, copy, building = [], nowBuilding }: { cases: CaseStudy[]; copy: BeatCopy; building?: CaseStudy[]; nowBuilding?: HomeContent['nowBuilding'] }) {
   return (
     <section aria-labelledby="beat-work" className="relative mx-auto mt-24 max-w-[1536px] px-4 lg:mt-32 lg:px-6">
-      <BeatHeader n={5} id="beat-work" eyebrow="Work" title={<>Stores open.<br />Tills ringing.</>} />
+      <BeatHeader n={5} id="beat-work" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
+        {copy.intro}
+      </BeatHeader>
       <div className="relative grid gap-4 md:grid-cols-2 lg:block lg:h-[1330px]">
         {cases.slice(0, 3).map((c, i) => (
           <Window key={c.slug} title={c.windowFileName} href={`/work/${c.slug}`} pos={POS[i]} delay={i * 0.1} bodyClassName="p-0">
@@ -50,6 +55,7 @@ export function Beat5Work({ cases }: { cases: CaseStudy[] }) {
           <Link href="/work">All work →</Link>
         </Sticker>
       </div>
+      {nowBuilding && <NowBuilding projects={building} title={nowBuilding.title} intro={nowBuilding.intro} />}
     </section>
   )
 }

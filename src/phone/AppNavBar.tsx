@@ -16,7 +16,7 @@ export function AppNavBar() {
   useEffect(() => {
     const h1 = document.querySelector<HTMLElement>('.app-cards h1')
     if (!h1) return
-    setTitle(h1.textContent?.trim() ?? '')
+    setTitle((h1.innerText || h1.textContent || '').replace(/\s+/g, ' ').trim())
     const io = new IntersectionObserver(([e]) => setCompact(!e.isIntersecting && e.boundingClientRect.top < 120), {
       rootMargin: '-100px 0px 0px 0px',
     })

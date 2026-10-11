@@ -39,6 +39,7 @@ for (const p of seed.pillars) {
 
 for (const r of seed.rateCard) await upsert('rate-card', { pillar: { equals: r.pillar } }, r)
 await payload.updateGlobal({ slug: 'pricing', data: seed.pricing, overrideAccess: true })
+await payload.updateGlobal({ slug: 'home', data: seed.home as never, overrideAccess: true })
 
 const { founderNote, ...settings } = seed.settings
 await payload.updateGlobal({ slug: 'settings', data: { ...settings, founderNote: { quote: founderNote.quote, name: founderNote.name, role: founderNote.role } }, overrideAccess: true })
@@ -59,6 +60,7 @@ for (const c of seed.caseStudies) {
     logo: undefined, cover: undefined, video: undefined, gallery: [],
     quote: c.quote ? testimonialIds.get(c.quote.quote) : undefined,
     seo: undefined,
+    projectStatus: c.status,
     _status: 'published',
   })
   if (c.quote) await payload.update({ collection: 'testimonials', id: testimonialIds.get(c.quote.quote)!, data: { caseStudy: doc.id }, overrideAccess: true })
