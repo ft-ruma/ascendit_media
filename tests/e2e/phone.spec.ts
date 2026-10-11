@@ -27,7 +27,10 @@ for (const width of [375, 390, 430]) {
       const lock = page.locator('.lockscreen')
       await expect(lock).toBeVisible()
       await expect(page.locator('#lock-time')).toHaveText(/\d\d:\d\d/)
-      await page.waitForTimeout(1100) // cards finished sliding in
+      // cards finished sliding in (wait for the animations themselves, not a fixed time: CI machines vary)
+      await page.waitForFunction(() =>
+        document.querySelector('.lockscreen')!.getAnimations({ subtree: true }).every((a) => a.effect?.getTiming().iterations === Infinity || a.playState === 'finished'),
+      )
       const { violations } = await new AxeBuilder({ page }).include('.lockscreen').analyze()
       expect(violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id)).toEqual([])
       await expect(lock).toBeHidden({ timeout: 4000 })
@@ -39,7 +42,7 @@ for (const width of [375, 390, 430]) {
       await skipBoot(page)
       await page.goto('/')
       const apps = page.getByRole('navigation', { name: 'Apps' })
-      for (const [name, path] of [['Work', '/work'], ['POS', '/products/pos'], ['Notes', '/notes'], ['Photos', '/photos'], ['Messages', '/messages'], ['Studio', '/studio'], ['Careers', '/careers'], ['Contact', '/contact'], ['Network', '/network']] as const) {
+      for (const [name, path] of [['Work', '/work'], ['POS', '/products/pos'], ['Notes', '/notes'], ['Photos', '/photos'], ['Messages', '/messages'], ['Studio', '/studio'], ['Careers', '/careers'], ['Contact', '/contact'], ['Projects', '/projects']] as const) {
         await expect(apps.getByRole('link', { name, exact: true })).toHaveAttribute('href', path)
       }
       await apps.getByRole('button', { name: 'Services' }).tap()

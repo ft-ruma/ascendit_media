@@ -188,6 +188,11 @@ export const caseStudies: CaseStudy[] = [
       { label: 'Floor area', value: '2,400', unit: 'sq ft' },
     ],
     gallery: [],
+    subProjects: [
+      { title: 'Store design & 3D renders', service: 'retail', status: 'completed', summary: 'Loop layout, fixtures and photoreal renders.' },
+      { title: 'POS install', service: 'software', status: 'completed', summary: 'Ascendit POS with supplier credit and daily WhatsApp sales.' },
+      { title: 'Social media launch', service: 'brand', status: 'completed', summary: 'Two-week launch campaign on Instagram and Facebook.' },
+    ],
     quote: testimonials[0],
     windowFileName: 'grocer-flagship.case',
     featured: true,
@@ -233,6 +238,11 @@ export const caseStudies: CaseStudy[] = [
       { label: 'Mobile LCP', value: '1.6', unit: 's' },
     ],
     gallery: [],
+    subProjects: [
+      { title: 'Online store', service: 'web', status: 'completed', summary: 'Headless store with estate pages and EU shipping.' },
+      { title: 'Packaging & branding', service: 'brand', status: 'completed', summary: 'Packaging refresh and a hill-country product shoot.' },
+      { title: 'Social media marketing', service: 'brand', status: 'in-progress', summary: 'Monthly content and ads for the EU launch.', startedAt: '2026-09-01' },
+    ],
     quote: testimonials[2],
     windowFileName: 'tea-store.case',
     featured: true,
@@ -493,9 +503,9 @@ export const home: HomeContent = {
   ],
   nowBuilding: { title: 'Now building', intro: 'Projects on the workbench right now.' },
   network: {
-    eyebrow: 'Network',
+    eyebrow: 'Ongoing & completed projects',
     title: 'Every project,\na new connection.',
-    intro: 'Each glowing node is a store we designed, a system we built or a brand we launched. When the network passes one hundred projects it becomes a universe, and every project becomes a star.',
+    intro: 'Each glowing node is a store we designed, a system we built or a brand we launched. Ongoing projects pulse; completed ones shine steady. When we pass one hundred projects it becomes a universe, and every project becomes a star.',
     universeAt: 100,
   },
 }

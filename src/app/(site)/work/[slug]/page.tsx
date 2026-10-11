@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCaseStudies, getCaseStudy } from '@/lib/cms'
-import { PILLAR_NAMES, pillarSlug } from '@/lib/pillars'
+import { PILLAR_NAMES, accentBg, pillarAccent, pillarSlug } from '@/lib/pillars'
 import { breadcrumbs, caseStudyJsonLd, pageMeta } from '@/lib/seo'
 import { ChatBubble } from '@/os/ChatBubble'
 import { JsonLd } from '@/os/JsonLd'
@@ -63,6 +63,30 @@ export default async function CaseStudyPage({ params }: Props) {
               </div>
             ))}
           </dl>
+        )}
+
+        {c.subProjects && c.subProjects.length > 0 && (
+          <section aria-labelledby="parts" className="grid gap-6 border-b border-hairline px-6 py-12 sm:px-10 lg:grid-cols-[1fr_2fr]">
+            <div>
+              <h2 id="parts" className="display text-[36px] text-ink">Project parts</h2>
+              <p className="mt-2 text-[15px] text-graphite">{c.subProjects.length} parts, each one a node in <Link href="/projects" className="underline underline-offset-4">ongoing & completed projects</Link>.</p>
+            </div>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {c.subProjects.map((x) => (
+                <li key={x.title} className="grid content-start gap-2 rounded-2xl border border-hairline bg-paper p-5">
+                  <p className="flex items-center gap-2 text-[13px] text-graphite">
+                    <span aria-hidden className={`size-2.5 rounded-full ${accentBg[pillarAccent[x.service]]}`} />
+                    {PILLAR_NAMES[x.service]}
+                    <span className={`ml-auto rounded-pill px-2 py-0.5 text-[12px] font-medium text-ink ${x.status === 'in-progress' ? 'bg-tangerine/25' : 'bg-lime/40'}`}>
+                      {x.status === 'in-progress' ? 'Ongoing' : 'Completed'}
+                    </span>
+                  </p>
+                  <h3 className="text-[19px] font-semibold tracking-tight text-ink">{x.title}</h3>
+                  {x.summary && <p className="text-[16px] leading-relaxed text-ink/85">{x.summary}</p>}
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <section className="grid gap-6 border-b border-hairline px-6 py-12 sm:px-10 lg:grid-cols-[1fr_2fr]">

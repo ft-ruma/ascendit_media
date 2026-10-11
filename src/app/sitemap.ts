@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...products.map((p) => u(`/products/${p.slug}`, 0.85)),
     u('/work', 0.8),
     ...cases.map((c) => u(`/work/${c.slug}`, 0.7, c.publishedAt)),
-    u('/network', 0.6),
+    u('/projects', 0.6),
     u('/studio', 0.5),
     u('/careers', 0.4),
     ...careers.map((c) => u(`/careers/${c.slug}`, 0.3)),

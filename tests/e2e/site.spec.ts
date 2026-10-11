@@ -69,28 +69,54 @@ test('robots and sitemap', async ({ request }) => {
 test.describe('project network', () => {
   test.beforeEach(async ({ page }) => skipBoot(page))
   test('every project is a node; picking one opens its details', async ({ page }) => {
-    await page.goto('/network')
+    await page.goto('/projects')
     await expect(page.locator('canvas')).toBeVisible()
-    await expect(page.getByText(/4 projects connected/)).toBeVisible()
-    await expect(page.getByText(/96 more projects until this network becomes a universe/)).toBeVisible()
-    const list = page.getByRole('list', { name: 'Projects in the network' })
-    await expect(list.getByRole('button')).toHaveCount(4)
-    await list.getByRole('button', { name: /Sample Grocer/ }).click()
-    const card = page.getByRole('dialog', { name: 'Sample Grocer' })
-    await expect(card).toContainText('Opened in 9 weeks')
-    await expect(card.getByRole('link', { name: /Open the project/ })).toHaveAttribute('href', '/work/sample-grocer-flagship')
+    // 4 main projects; two have 3 sub-projects each, and each sub-project counts as one
+    await expect(page.getByText(/8 projects connected/)).toBeVisible()
+    await expect(page.getByText(/from 4 main projects/)).toBeVisible()
+    await expect(page.getByText(/92 more projects until this becomes a universe/)).toBeVisible()
+    const list = page.getByRole('list', { name: 'Ongoing and completed projects' })
+    await expect(list.getByRole('button')).toHaveCount(8)
+    await list.getByRole('button', { name: 'Sample Pharmacy Chain' }).click()
+    const card = page.getByRole('dialog', { name: 'Sample Pharmacy Chain' })
+    await expect(card).toContainText('One fixture system')
+    await expect(card.getByRole('link', { name: /Open the project/ })).toHaveAttribute('href', '/work/sample-pharmacy-refit')
     await page.keyboard.press('Escape')
     await expect(card).toBeHidden()
   })
 
+  test('sub-projects: each part is a node, the card lists the other parts', async ({ page }) => {
+    await page.goto('/projects')
+    const list = page.getByRole('list', { name: 'Ongoing and completed projects' })
+    await list.getByRole('button', { name: 'Sample Tea Co.: Social media marketing' }).click()
+    const card = page.getByRole('dialog', { name: 'Sample Tea Co.: Social media marketing' })
+    await expect(card).toContainText('Ongoing')
+    await expect(card).toContainText('3 parts of this project')
+    await card.getByRole('button', { name: /Online store/ }).click()
+    await expect(page.getByRole('dialog', { name: 'Sample Tea Co.: Online store' })).toContainText('Completed')
+    await expect(page.getByRole('dialog').getByRole('link', { name: /Open the project/ })).toHaveAttribute('href', '/work/sample-tea-online-store')
+  })
+
+  test('case study page lists its parts', async ({ page }) => {
+    await page.goto('/work/sample-tea-online-store')
+    const parts = page.getByRole('region', { name: 'Project parts' })
+    await expect(parts.getByRole('listitem')).toHaveCount(3)
+    await expect(parts).toContainText('Social media marketing')
+  })
+
   test('becomes a universe past the threshold (preview)', async ({ page }) => {
-    await page.goto('/network?network=grow:120')
+    await page.goto('/projects?view=grow:120')
     await expect(page.getByText(/120 projects in orbit/)).toBeVisible()
     await expect(page.getByText('universe.app').first()).toBeVisible()
   })
 
-  test('axe on /network', async ({ page }) => {
+  test('the old /network address redirects to /projects', async ({ page }) => {
     await page.goto('/network')
+    await expect(page).toHaveURL(/\/projects$/)
+  })
+
+  test('axe on /projects', async ({ page }) => {
+    await page.goto('/projects')
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()
     expect(violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id)).toEqual([])
   })

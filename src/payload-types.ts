@@ -310,6 +310,28 @@ export interface CaseStudy {
       }[]
     | null;
   /**
+   * The parts of this project, e.g. 3D design, branding, social media marketing. Each one is its own node in "Ongoing & completed projects" and counts as one toward the universe total. A project with no sub-projects counts as one.
+   */
+  subProjects?:
+    | {
+        title: string;
+        /**
+         * Sets the node colour.
+         */
+        service: 'retail' | 'software' | 'web' | 'brand';
+        stage: 'completed' | 'in-progress';
+        /**
+         * Optional: one or two lines on what was done.
+         */
+        summary?: string | null;
+        /**
+         * Optional. Newer work grows further out; empty uses the project date.
+         */
+        startedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Cover frame. Needed before publishing; the site shows a placeholder slate until then.
    */
   cover?: (number | null) | Media;
@@ -860,6 +882,16 @@ export interface CaseStudiesSelect<T extends boolean = true> {
         unit?: T;
         id?: T;
       };
+  subProjects?:
+    | T
+    | {
+        title?: T;
+        service?: T;
+        stage?: T;
+        summary?: T;
+        startedAt?: T;
+        id?: T;
+      };
   cover?: T;
   gallery?: T;
   video?: T;
@@ -1285,7 +1317,7 @@ export interface Home {
     title: string;
     intro?: string | null;
     /**
-     * Preview the universe any time with ?network=universe on the home or /network page.
+     * Preview the universe any time with ?view=universe on the home or /projects page.
      */
     universeAt: number;
   };

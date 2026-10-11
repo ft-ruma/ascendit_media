@@ -61,6 +61,7 @@ for (const c of seed.caseStudies) {
     quote: c.quote ? testimonialIds.get(c.quote.quote) : undefined,
     seo: undefined,
     projectStatus: c.status,
+    subProjects: (c.subProjects ?? []).map(({ status, ...x }) => ({ ...x, stage: status })),
     _status: 'published',
   })
   if (c.quote) await payload.update({ collection: 'testimonials', id: testimonialIds.get(c.quote.quote)!, data: { caseStudy: doc.id }, overrideAccess: true })

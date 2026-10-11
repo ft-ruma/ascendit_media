@@ -4,6 +4,7 @@ import { LazyNetwork } from '@/network/LazyNetwork'
 import type { NetProject } from '@/network/ProjectNetwork'
 import { Window } from '@/os/Window'
 import { BeatHeader } from '../BeatHeader'
+import { countNodes } from '@/network/types'
 
 /** Home beat: every project as a node in a growing network (a universe after the threshold). */
 export function BeatNetwork({ copy, projects, universeAt }: { copy: BeatCopy; projects: NetProject[]; universeAt: number }) {
@@ -12,7 +13,7 @@ export function BeatNetwork({ copy, projects, universeAt }: { copy: BeatCopy; pr
       <BeatHeader n={6} id="beat-network" eyebrow={copy.eyebrow} title={<Lines text={copy.title} />}>
         {copy.intro}
       </BeatHeader>
-      <Window title={projects.length >= universeAt ? 'universe.app' : 'network.app'} href="/network" bodyClassName="p-3 sm:p-4" draggable={false}>
+      <Window title={countNodes(projects) >= universeAt ? 'universe.app' : 'projects.app'} href="/projects" bodyClassName="p-3 sm:p-4" draggable={false}>
         <LazyNetwork projects={projects} universeAt={universeAt} />
       </Window>
     </section>

@@ -22,7 +22,7 @@ export const Home: GlobalConfig = {
   label: 'Home page',
   admin: { group: 'Content', description: 'Headlines and section text on the home page (desktop and phone).' },
   access: { read: anyone, update: editors },
-  hooks: { afterChange: [() => revalidate(['/', '/network'])] },
+  hooks: { afterChange: [() => revalidate(['/', '/projects'])] },
   fields: [
     {
       type: 'tabs',
@@ -88,9 +88,9 @@ export const Home: GlobalConfig = {
           ],
         },
         {
-          label: 'Network',
+          label: 'Ongoing & completed projects',
           name: 'network',
-          description: 'The project network: every case study is a node. It becomes a universe at the threshold below.',
+          description: 'Every case study, ongoing or completed, is a glowing node. It becomes a universe at the threshold below.',
           fields: [
             { name: 'eyebrow', type: 'text', required: true, defaultValue: d.network.eyebrow },
             { name: 'title', type: 'textarea', required: true, defaultValue: d.network.title },
@@ -102,7 +102,7 @@ export const Home: GlobalConfig = {
               min: 10,
               defaultValue: d.network.universeAt,
               label: 'Becomes a universe at (projects)',
-              admin: { description: 'Preview the universe any time with ?network=universe on the home or /network page.' },
+              admin: { description: 'Preview the universe any time with ?view=universe on the home or /projects page.' },
             },
           ],
         },

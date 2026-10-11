@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   // Old real paths from the current site go here as 301s once they are listed.
   // Hash anchors (/#services, /#pricing) never reach the server: see HashRedirect.
   async redirects() {
-    return []
+    return [{ source: '/network', destination: '/projects', permanent: true }]
   },
 }
 

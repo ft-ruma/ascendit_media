@@ -14,6 +14,7 @@ import { AppTile, glyph, tiles } from './AppTile'
 import { HelloSticker } from './HelloSticker'
 import { ServicesFolder } from './ServicesFolder'
 import { StoreToSystemWidget } from './StoreToSystemWidget'
+import { countNodes } from '@/network/types'
 
 type Props = { settings: Settings; products: Product[]; cases: CaseStudy[]; copy: HomeContent['phoneHero']; nowBuilding: HomeContent['nowBuilding']; network: { projects: NetProject[]; universeAt: number } }
 
@@ -81,7 +82,7 @@ export function HomeScreen({ settings, products, cases: all, copy, nowBuilding, 
           <li className="flex justify-center"><AppTile href="/studio" label="Studio" tile={tiles.studio}>{glyph.studio}</AppTile></li>
           <li className="flex justify-center"><AppTile href="/careers" label="Careers" tile={tiles.careers}>{glyph.careers}</AppTile></li>
           <li className="flex justify-center"><AppTile href="/contact" label="Contact" tile={tiles.contact}>{glyph.contact}</AppTile></li>
-          <li className="flex justify-center"><AppTile href="/network" label="Network" tile={tiles.network}>{glyph.network}</AppTile></li>
+          <li className="flex justify-center"><AppTile href="/projects" label="Projects" tile={tiles.network}>{glyph.network}</AppTile></li>
         </ul>
       </nav>
 
@@ -96,8 +97,8 @@ export function HomeScreen({ settings, products, cases: all, copy, nowBuilding, 
       {/* Project network widget: tap a node for the project, or open the full app */}
       <section aria-labelledby="network-widget" className="widget overflow-hidden p-3">
         <div className="flex items-baseline justify-between px-1 pb-2">
-          <h2 id="network-widget" className="text-[20px] font-medium tracking-tight text-ink">{network.projects.length >= network.universeAt ? 'Our universe' : 'Our network'}</h2>
-          <Link href="/network" data-app className="flex min-h-11 items-center font-mono text-[13px] text-aqua-deep">Open ›</Link>
+          <h2 id="network-widget" className="text-[20px] font-medium tracking-tight text-ink">{countNodes(network.projects) >= network.universeAt ? 'Our universe' : 'Ongoing & completed'}</h2>
+          <Link href="/projects" data-app className="flex min-h-11 items-center font-mono text-[13px] text-aqua-deep">Open ›</Link>
         </div>
         <LazyNetwork projects={network.projects} universeAt={network.universeAt} variant="widget" />
       </section>

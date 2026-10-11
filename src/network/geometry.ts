@@ -102,9 +102,11 @@ export const brainPointsFor = (universeAt: number) => Math.min(1800, Math.max(90
 
 /**
  * The brain for a given universe threshold: cortex + inner neurons, linked as a mesh,
- * and an ordered list of project slots growing outward from the core.
+ * and a slot for each node, growing outward from the core. `nodes` is the node count, or
+ * each node's group (its main project), so parts of one project sit next to each other.
  */
-export function brainLayout(universeAt: number, projects: number, seed = 7): Layout {
+export function brainLayout(universeAt: number, nodes: number | number[], seed = 7): Layout {
+  const groups = typeof nodes === 'number' ? Array.from({ length: nodes }, (_, i) => i) : nodes
   const r = rng(seed)
   const count = brainPointsFor(universeAt)
   const points: Neuron[] = cortex(Math.round(count * 0.74), r)
@@ -166,7 +168,37 @@ export function brainLayout(universeAt: number, projects: number, seed = 7): Lay
   const spaced = spacedWith(lo)
   const taken = new Set(spaced)
   const order = [...spaced, ...byDistance.filter((i) => !taken.has(i))]
-  return { points, edges, projectSlots: order.slice(0, Math.min(projects, order.length)), gap: lo }
+
+  // Assign in node order (appending a node never changes earlier ones). A project's first node takes
+  // the next slot outward; its other parts take the free spaced slots nearest to it.
+  const used = new Set<number>()
+  const anchorOf = new Map<number, number>()
+  const projectSlots: number[] = []
+  let cursor = 0
+  for (const g of groups) {
+    let pick = -1
+    const anchor = anchorOf.get(g)
+    if (anchor != null) {
+      let best = Infinity
+      for (const i of spaced) {
+        if (used.has(i)) continue
+        const d = d2(points[i], points[anchor])
+        if (d < best) {
+          best = d
+          pick = i
+        }
+      }
+    }
+    if (pick < 0) {
+      while (cursor < order.length && used.has(order[cursor])) cursor++
+      if (cursor >= order.length) break
+      pick = order[cursor]
+    }
+    used.add(pick)
+    projectSlots.push(pick)
+    if (anchor == null) anchorOf.set(g, pick)
+  }
+  return { points, edges, projectSlots, gap: lo }
 }
 
 /**
@@ -180,6 +212,13 @@ export function galaxyStar(i: number, arms = 3): P3 & { arm: number } {
   const radius = t * 0.46 + (r() - 0.5) * 0.035
   const angle = (arm / arms) * Math.PI * 2 + t * Math.PI * 2.6 + (r() - 0.5) * 0.35
   return { x: Math.cos(angle) * radius, y: (r() - 0.5) * 0.03, z: Math.sin(angle) * radius, arm }
+}
+
+/** A project's other parts orbit its star like moons: a small, fixed offset per part. */
+export function galaxyMoon(star: P3, j: number): P3 {
+  const a = j * 2.39996 + 0.6
+  const r = 0.024 + 0.006 * j
+  return { x: star.x + Math.cos(a) * r, y: star.y + (j % 2 ? 0.006 : -0.006), z: star.z + Math.sin(a) * r }
 }
 
 /** Galaxy dust: a bright bulge, spiral arms, and distant field stars around it. */

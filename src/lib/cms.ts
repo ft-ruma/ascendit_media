@@ -101,6 +101,13 @@ const toCaseStudy = (d: Doc): CaseStudy => ({
   status: d.projectStatus === 'in-progress' ? 'in-progress' : 'completed',
   progress: d.progress,
   expectedLaunch: d.expectedLaunch,
+  subProjects: (d.subProjects ?? []).map((x: Doc) => ({
+    title: x.title,
+    service: x.service,
+    status: x.stage === 'in-progress' ? 'in-progress' : 'completed',
+    summary: x.summary ?? null,
+    startedAt: x.startedAt ?? null,
+  })),
   publishedAt: d.publishedAt,
   seo: seo(d),
 })

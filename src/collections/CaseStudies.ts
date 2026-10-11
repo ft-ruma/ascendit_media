@@ -20,7 +20,7 @@ export const CaseStudies: CollectionConfig = {
       async ({ doc, previousDoc }) => {
         if (doc._status !== 'published') return
         const pillars: string[] = doc.pillars ?? []
-        await revalidate(['/', '/network', '/work', `/work/${doc.slug}`, ...pillars.map((p) => `/services/${pillarSlug(p)}`)])
+        await revalidate(['/', '/projects', '/work', `/work/${doc.slug}`, ...pillars.map((p) => `/services/${pillarSlug(p)}`)])
         if (previousDoc?._status !== 'published') await notifyN8n('case-study.published', doc)
       },
     ],
@@ -69,6 +69,46 @@ export const CaseStudies: CollectionConfig = {
             { name: 'value', type: 'text', required: true },
             { name: 'unit', type: 'text' },
           ],
+        },
+      ],
+    },
+    {
+      name: 'subProjects',
+      label: 'Sub-projects',
+      type: 'array',
+      labels: { singular: 'Sub-project', plural: 'Sub-projects' },
+      admin: {
+        initCollapsed: false,
+        description:
+          'The parts of this project, e.g. 3D design, branding, social media marketing. Each one is its own node in "Ongoing & completed projects" and counts as one toward the universe total. A project with no sub-projects counts as one.',
+        components: { RowLabel: '/admin-ui/SubProjectLabel#SubProjectLabel' },
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'title', type: 'text', required: true, admin: { placeholder: 'e.g. 3D design', width: '40%' } },
+            { name: 'service', type: 'select', required: true, options: PILLAR_OPTIONS, admin: { width: '30%', description: 'Sets the node colour.' } },
+            {
+              name: 'stage',
+              label: 'Status',
+              type: 'select',
+              required: true,
+              defaultValue: 'completed',
+              options: [
+                { label: 'Completed', value: 'completed' },
+                { label: 'Ongoing', value: 'in-progress' },
+              ],
+              admin: { width: '30%' },
+            },
+          ],
+        },
+        { name: 'summary', type: 'textarea', admin: { description: 'Optional: one or two lines on what was done.' } },
+        {
+          name: 'startedAt',
+          label: 'Started',
+          type: 'date',
+          admin: { date: { pickerAppearance: 'monthOnly' }, description: 'Optional. Newer work grows further out; empty uses the project date.' },
         },
       ],
     },

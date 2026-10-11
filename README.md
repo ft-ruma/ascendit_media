@@ -33,7 +33,7 @@ open jobs, leads waiting in the outbox) and a one-page editor guide. What editor
 
 | Area | Where in the admin | Shows on |
 | --- | --- | --- |
-| Projects: case studies and work **in progress** (status, progress note, launch month) | Content → Case Studies | /work, case pages, home Work section + "Now building", phone home |
+| Projects: case studies and work **in progress** (status, progress note, launch month), **sub-projects** (each counts toward the 100) | Content → Case Studies | /work, case pages, home Work section + "Now building", phone home |
 | Every home-page headline, section title, Store to System steps, phone hero | Content → Home page | / (desktop and phone) |
 | Services: copy, capabilities, process, tools, "from" prices, **render gallery** | Services → Pillars | /services/*, /photos |
 | Products and plans | Products → Products | /products/*, dock, builder |
@@ -79,7 +79,7 @@ n8n/                   lead-intake workflow notes, HMAC verify node, generated s
 supabase/cms-role.sql  cms schema + payload role with no CRM grants
 ```
 
-## Project network (`/network`, home section 06, phone widget)
+## Ongoing & completed projects (`/projects`, home section 06, phone widget)
 
 Every case study, completed or in progress, is a glowing node in a 3D neural brain: two
 hemispheres with a folded cortex (thousands of particles, rim-lit), lobes, cerebellum and
@@ -88,13 +88,20 @@ slowly; drag to turn it. Tap a node (or pick a project from the list under it) t
 services, result, progress and a link to the case study. Node colour is the service; a pulsing
 ring means in progress.
 
+**Sub-projects count.** A project's parts (Case Studies → Sub-projects, e.g. 3D design, branding,
+social media marketing) are each a node and each count as one toward the universe total; a project
+with no sub-projects counts as one. Parts of one project sit side by side and are linked (moons around
+the project's star in the universe). The card lists the other parts; the case study page lists them
+under "Project parts"; the admin dashboard shows the running total.
+
 Growth is the point: the oldest project sits at the core and each new one connects further out.
-When the count reaches the threshold (Home page → Network → "Becomes a universe at", default 100)
+When the count reaches the threshold (Home page → Ongoing & completed projects → "Becomes a universe at", default 100)
 the brain turns into a spiral galaxy and every project becomes a star, with trails along the arms
 in date order. Positions are deterministic: adding a project never moves the existing ones.
 
-Previews (add to the URL of `/` or `/network`): `?network=universe`, `?network=brain`, and
-`?network=grow:60` to fill the network with placeholder nodes and see it at 60 projects.
+Previews (add to the URL of `/` or `/projects`): `?view=universe`, `?view=brain`, and
+`?view=grow:60` to fill it with placeholder nodes and see it at 60 projects. The old `/network`
+address redirects to `/projects`.
 
 Code: `src/network/geometry.ts` (pure 3D layout, unit-tested), `ProjectNetwork.tsx` (2D canvas with its own
 3D projection, additive glow and bloom, no WebGL or 3D library; animates

@@ -20,6 +20,14 @@ export async function Welcome({ payload, user }: Props) {
     count(payload, 'careers', { open: { equals: true } }),
     count(payload, 'lead_outbox', { delivered: { equals: false } }),
   ])
+  // Network total: every sub-project counts as one; a project without sub-projects counts as one.
+  let counted = 0
+  let universeAt = 100
+  try {
+    const { docs } = await payload.find({ collection: 'case-studies', limit: 1000, depth: 0, pagination: false, overrideAccess: true, select: { subProjects: true } as never })
+    counted = (docs as { subProjects?: unknown[] }[]).reduce((n, d) => n + Math.max(1, d.subProjects?.length ?? 0), 0)
+    universeAt = Number(((await payload.findGlobal({ slug: 'home' as never, depth: 0 })) as { network?: { universeAt?: number } }).network?.universeAt) || 100
+  } catch {}
   const isAdmin = user?.roles?.includes('admin')
   const site = process.env.NEXT_PUBLIC_SITE_URL || '/'
 
@@ -47,6 +55,7 @@ export async function Welcome({ payload, user }: Props) {
       <div style={s.stats}>
         <Stat n={building} label="projects in progress" href="/admin/collections/case-studies?where[projectStatus][equals]=in-progress" />
         <Stat n={completed} label="case studies" href="/admin/collections/case-studies" />
+        <Stat n={counted} label={`projects counted, sub-projects included · ${Math.max(0, universeAt - counted)} more to the universe`} href="/projects" />
         <Stat n={products} label="products" href="/admin/collections/products" />
         <Stat n={jobs} label="open jobs" href="/admin/collections/careers" />
         {isAdmin && <Stat n={outbox} label="leads waiting in outbox" href="/admin/collections/lead_outbox" warn={outbox > 0} />}
@@ -64,7 +73,7 @@ export async function Welcome({ payload, user }: Props) {
       <details style={s.guide}>
         <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Editor guide (one page)</summary>
         <ol style={s.ol}>
-          <li><b>Projects.</b> Case Studies holds every project. Set <i>Status</i> to <i>In progress</i> to show it under “Now building” with a progress note; switch it to <i>Completed</i> when it launches. Tick <i>Featured</i> to put it on the home page.</li>
+          <li><b>Projects.</b> Case Studies holds every project. Add its parts (3D design, branding, social media…) under <i>Sub-projects</i>: each part is its own node in Ongoing & completed projects and counts as one toward the universe total. Set <i>Status</i> to <i>In progress</i> to show it under “Now building” with a progress note; switch it to <i>Completed</i> when it launches. Tick <i>Featured</i> to put it on the home page.</li>
           <li><b>Drafts and publishing.</b> Case studies and products save as drafts. Press <i>Publish</i> to go live; the affected pages refresh in seconds. Use <i>Schedule publish</i> for a launch date, and <i>Live preview</i> to see the page while you type.</li>
           <li><b>Home page.</b> Globals → Home page has every headline. In titles, press Enter where the line should break on desktop.</li>
           <li><b>Images and video.</b> Every upload needs alt text (describe what is shown). Videos need a poster frame; encode loops with <code>scripts/encode.sh</code> first (under 1.5 MB).</li>

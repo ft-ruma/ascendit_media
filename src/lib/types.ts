@@ -42,6 +42,16 @@ export type Testimonial = {
   caseStudy?: string | null
 }
 
+/** One part of a project (e.g. 3D design, branding, social media). Each counts as one project in the network. */
+export type SubProject = {
+  title: string
+  service: PillarKey
+  status: 'completed' | 'in-progress'
+  summary?: string | null
+  /** when it started; places it in the network's growth order (defaults to the project date) */
+  startedAt?: string | null
+}
+
 export type CaseStudy = {
   slug: string
   client: string
@@ -64,6 +74,8 @@ export type CaseStudy = {
   status: 'completed' | 'in-progress'
   progress?: string | null
   expectedLaunch?: string | null
+  /** parts of the project; each counts toward the network total (none = the project counts as one) */
+  subProjects?: SubProject[]
   seo?: Seo
 }
 

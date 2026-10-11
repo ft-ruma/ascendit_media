@@ -6,32 +6,25 @@ import { PILLAR_NAMES } from '@/lib/pillars'
 import { cue } from '@/lib/sound'
 import type { PillarKey } from '@/lib/types'
 import { useReducedMotion } from '@/lib/useReducedMotion'
-import { type P3, brainLayout, cortexDust, galaxyDust, galaxyStar } from './geometry'
+import { type P3, brainLayout, cortexDust, galaxyDust, galaxyMoon, galaxyStar } from './geometry'
+import type { NetPart, NetProject } from './types'
 
-export type NetProject = {
-  slug: string
-  client: string
-  industry: string
-  location: 'LK' | 'intl'
-  pillars: PillarKey[]
-  result: string
-  status: 'completed' | 'in-progress'
-  progress?: string | null
-  metrics: { label: string; value: string; unit?: string | null }[]
-  publishedAt: string
-}
+export type { NetPart, NetProject } from './types'
 
 type Props = {
   projects: NetProject[]
-  /** Project count at which the brain becomes a universe (CMS: Home page → Network). */
+  /** Project count at which the brain becomes a universe (CMS: Home page → Ongoing & completed projects). */
   universeAt: number
-  /** "auto" follows the count; the others are for previews (?network=universe). */
+  /** "auto" follows the count; the others are for previews (?view=universe). */
   mode?: 'auto' | 'brain' | 'universe'
   variant?: 'section' | 'widget' | 'page'
 }
 
 const COLORS: Record<PillarKey, string> = { retail: '#FF8A3D', software: '#B9A6FF', web: '#8EC5FF', brand: '#C8F45A' }
-const colorOf = (p: NetProject) => COLORS[p.pillars[0] ?? 'web']
+const colorOf = (p: { service: PillarKey }) => COLORS[p.service] ?? COLORS.web
+/** A node: one sub-project (or a whole project), with its main project and its place in that project. */
+type Node = NetPart & { pi: number; j: number }
+const partLabel = (n: Node, p: NetProject) => (n.whole ? p.client : `${p.client} · ${n.title}`)
 
 /** A soft round glow, drawn once per colour and stamped with drawImage (much cheaper than shadowBlur). */
 function sprite(color: string, core = '#FFFFFF', size = 64) {
@@ -78,29 +71,47 @@ const buffers = (n: number) => ({ x: new Float32Array(n), y: new Float32Array(n)
 
 export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'auto', variant = 'section' }: Props) {
   // Previews, read after mount so the static HTML stays cacheable:
-  //   ?network=universe | brain   force either state
-  //   ?network=grow:60            add placeholder nodes to see the network at 60 projects
+  //   ?view=universe | brain   force either state
+  //   ?view=grow:60               add placeholder nodes to see the network at 60 projects
   const [preview, setPreview] = useState<{ mode?: Props['mode']; grow?: number } | null>(null)
   useEffect(() => {
-    const q = new URLSearchParams(location.search).get('network') ?? ''
+    const q = new URLSearchParams(location.search).get('view') ?? ''
     if (q === 'universe' || q === 'brain') setPreview({ mode: q })
     const g = /^grow:(\d{1,4})$/.exec(q)
     if (g) setPreview({ grow: Math.min(1000, Number(g[1])) })
   }, [])
   const projects = useMemo(() => {
-    const n = preview?.grow ?? 0
-    if (n <= real.length) return real
+    const want = preview?.grow ?? 0
+    let have = real.reduce((n, p) => n + p.parts.length, 0)
+    if (want <= have) return real
     const keys: PillarKey[] = ['retail', 'software', 'web', 'brand']
-    return [
-      ...real,
-      ...Array.from({ length: n - real.length }, (_, i): NetProject => ({
-        slug: '', client: `Preview project ${real.length + i + 1}`, industry: 'Preview', location: 'LK', pillars: [keys[i % 4]],
-        result: 'A placeholder node from ?network=grow, to preview how the network fills up.', status: 'completed', metrics: [], publishedAt: '',
-      })),
-    ]
+    const extra: NetProject[] = []
+    const kinds = ['3D design', 'Branding', 'Social media']
+    while (have < want) {
+      const k = real.length + extra.length + 1
+      const size = Math.min(want - have, k % 3 === 0 ? 1 : 3)
+      extra.push({
+        slug: '', client: `Preview project ${k}`, industry: 'Preview', location: 'LK', pillars: [keys[k % 4]], status: 'completed', metrics: [], publishedAt: '',
+        result: 'A placeholder from ?view=grow, to preview how the network fills up.',
+        parts: Array.from({ length: size }, (_, j) => ({ title: size === 1 ? `Preview project ${k}` : kinds[j], service: keys[(k + j) % 4], status: 'completed' as const, date: '9999', whole: size === 1 })),
+      })
+      have += size
+    }
+    return [...real, ...extra]
   }, [real, preview])
+  // Every sub-project is a node; newer work grows further out.
+  const nodes = useMemo(() => {
+    const all: Node[] = projects.flatMap((p, pi) => p.parts.map((part, j) => ({ ...part, pi, j })))
+    return all.sort((x, y) => x.date.localeCompare(y.date) || x.pi - y.pi || x.j - y.j)
+  }, [projects])
+  /** node indices of each project's parts, in node order */
+  const groups = useMemo(() => {
+    const out: number[][] = projects.map(() => [])
+    nodes.forEach((n, k) => out[n.pi].push(k))
+    return out
+  }, [projects, nodes])
   const mode = preview?.mode ?? modeProp
-  const universe = mode === 'universe' || (mode === 'auto' && projects.length >= universeAt)
+  const universe = mode === 'universe' || (mode === 'auto' && nodes.length >= universeAt)
   const canvas = useRef<HTMLCanvasElement>(null)
   const wrap = useRef<HTMLDivElement>(null)
   const tipRef = useRef<HTMLSpanElement>(null)
@@ -116,7 +127,7 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
   hov.current = hover
 
   // Fixed point count per threshold, so adding a project never re-lays the brain.
-  const layout = useMemo(() => brainLayout(universeAt, projects.length), [universeAt, projects.length])
+  const layout = useMemo(() => brainLayout(universeAt, nodes.map((n) => n.pi)), [universeAt, nodes])
 
   useEffect(() => {
     const cv = canvas.current
@@ -170,7 +181,15 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
     /* ---------- universe state ---------- */
     const dust = universe ? galaxyDust(small ? 700 : 1500) : []
     const D3 = buffers(dust.length)
-    const stars = universe ? projects.map((_, k) => galaxyStar(k)) : []
+    const firsts = groups.filter((g) => g.length).map((g) => g[0]).sort((a, b) => a - b)
+    const starOf = new Map(firsts.map((k, ordinal) => [nodes[k].pi, galaxyStar(ordinal)]))
+    const stars: P3[] = universe
+      ? nodes.map((n, k) => {
+          const g = groups[n.pi]
+          const star = starOf.get(n.pi)!
+          return g[0] === k ? star : galaxyMoon(star, g.indexOf(k))
+        })
+      : []
     const S = buffers(stars.length)
 
     const resize = () => {
@@ -207,6 +226,31 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
       ctx.globalCompositeOperation = 'lighter' // everything luminous adds up, like real light
     }
 
+    /** Links each project's parts to its first part (a small constellation per project). */
+    const siblings = (at: { x: number; y: number }[], focusGroup: number, unit: number) => {
+      ctx.lineWidth = 0.9 * unit
+      ctx.strokeStyle = 'rgba(255,255,255,.2)'
+      ctx.beginPath()
+      groups.forEach((g, gi) => {
+        if (gi === focusGroup || g.length < 2 || !at[g[0]]) return
+        for (const k of g.slice(1)) if (at[k]) {
+          ctx.moveTo(at[g[0]].x, at[g[0]].y)
+          ctx.lineTo(at[k].x, at[k].y)
+        }
+      })
+      ctx.stroke()
+      const g = groups[focusGroup]
+      if (!g || g.length < 2) return
+      ctx.lineWidth = 1.8 * unit
+      ctx.strokeStyle = 'rgba(255,255,255,.85)'
+      ctx.beginPath()
+      for (const k of g.slice(1)) if (at[k] && at[g[0]]) {
+        ctx.moveTo(at[g[0]].x, at[g[0]].y)
+        ctx.lineTo(at[k].x, at[k].y)
+      }
+      ctx.stroke()
+    }
+
     const draw = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
@@ -218,7 +262,7 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
       if (!reduced) cam.current.yaw += spin * dt
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       // glows shrink a little as the network fills, so neighbours stay distinct
-      const dense = Math.max(0.6, 1 - projects.length / 250)
+      const dense = Math.max(0.6, 1 - nodes.length / 250)
 
       if (!universe) {
         const s = Math.min(w / 1.6, h / 1.15)
@@ -274,7 +318,7 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
           g.stroke()
         }
         if (focusPt >= 0) {
-          g.strokeStyle = colorOf(projects[focus!])
+          g.strokeStyle = colorOf(nodes[focus!])
           g.lineWidth = 1.2 * unit
           g.beginPath()
           for (const j of adj[focusPt]) {
@@ -296,7 +340,7 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
           emit += dt
           if (focusPt >= 0 && emit > 0.18) {
             emit = 0
-            spawn(focusPt, colorOf(projects[focus!]), 4)
+            spawn(focusPt, colorOf(nodes[focus!]), 4)
           }
           for (let i = pulses.length - 1; i >= 0; i--) {
             const p = pulses[i]
@@ -352,18 +396,21 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
         ctx.drawImage(bloom, 0, 0, w, h)
         ctx.globalAlpha = 1
 
-        // projects
+        // parts of one project are linked, so a project reads as one group
         screen.current = layout.projectSlots.map((pi) => ({ x: P.x[pi], y: P.y[pi], z: P.z[pi] }))
-        projects.forEach((proj, k) => {
+        const focusGroup = focus != null ? nodes[focus]?.pi : -1
+        siblings(screen.current, focusGroup, unit)
+        nodes.forEach((node, k) => {
           const pi = layout.projectSlots[k]
           if (pi == null) return
           const on = focus === k
-          const live = proj.status === 'in-progress'
+          const kin = node.pi === focusGroup
+          const live = node.status === 'in-progress'
           const n = depth(P.z[pi])
-          const rr = ((on ? 10 : 6.5) * (on ? 1 : dense) + (live ? Math.sin(t * 3 + k) * 1.2 : 0) + flare[pi] * 3) * unit * P.k[pi]
-          ctx.globalAlpha = on ? 1 : 0.35 + 0.65 * n
-          ctx.drawImage(glow(colorOf(proj)), P.x[pi] - rr * 4, P.y[pi] - rr * 4, rr * 8, rr * 8)
-          ctx.drawImage(glow(colorOf(proj), '#FFFFFF'), P.x[pi] - rr * 1.6, P.y[pi] - rr * 1.6, rr * 3.2, rr * 3.2)
+          const rr = ((on ? 10 : kin ? 8 : 6.5) * (on || kin ? 1 : dense) + (live ? Math.sin(t * 3 + k) * 1.2 : 0) + flare[pi] * 3) * unit * P.k[pi]
+          ctx.globalAlpha = on || kin ? 1 : 0.35 + 0.65 * n
+          ctx.drawImage(glow(colorOf(node)), P.x[pi] - rr * 4, P.y[pi] - rr * 4, rr * 8, rr * 8)
+          ctx.drawImage(glow(colorOf(node), '#FFFFFF'), P.x[pi] - rr * 1.6, P.y[pi] - rr * 1.6, rr * 3.2, rr * 3.2)
           if (live) {
             ctx.strokeStyle = 'rgba(255,138,61,.8)'
             ctx.lineWidth = 1.2
@@ -394,17 +441,21 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
         ctx.strokeStyle = 'rgba(200,244,90,.22)'
         ctx.lineWidth = 0.8
         ctx.beginPath()
-        for (let k = 3; k < stars.length; k++) {
-          ctx.moveTo(S.x[k - 3], S.y[k - 3]) // galaxyStar puts project k on arm k % 3
-          ctx.lineTo(S.x[k], S.y[k])
+        for (let i = 3; i < firsts.length; i++) {
+          ctx.moveTo(S.x[firsts[i - 3]], S.y[firsts[i - 3]]) // galaxyStar puts the i-th project on arm i % 3
+          ctx.lineTo(S.x[firsts[i]], S.y[firsts[i]])
         }
         ctx.stroke()
-        projects.forEach((proj, k) => {
+        const focusGroup = focus != null ? nodes[focus]?.pi : -1
+        siblings(screen.current, focusGroup, unit)
+        nodes.forEach((node, k) => {
           const on = focus === k
-          const rr = (on ? 8 : 4.5) * (on ? 1 : dense) * unit * S.k[k] * (1 + 0.12 * Math.sin(t * 2.4 + k * 1.7))
+          const kin = node.pi === focusGroup
+          const moon = groups[node.pi][0] !== k
+          const rr = (on ? 8 : kin ? 6 : moon ? 3.2 : 4.5) * (on || kin ? 1 : dense) * unit * S.k[k] * (1 + 0.12 * Math.sin(t * 2.4 + k * 1.7))
           ctx.globalAlpha = 1
-          ctx.drawImage(glow(colorOf(proj)), S.x[k] - rr * 4, S.y[k] - rr * 4, rr * 8, rr * 8)
-          ctx.drawImage(glow(colorOf(proj), '#FFFFFF'), S.x[k] - rr * 1.4, S.y[k] - rr * 1.4, rr * 2.8, rr * 2.8)
+          ctx.drawImage(glow(colorOf(node)), S.x[k] - rr * 4, S.y[k] - rr * 4, rr * 8, rr * 8)
+          ctx.drawImage(glow(colorOf(node), '#FFFFFF'), S.x[k] - rr * 1.4, S.y[k] - rr * 1.4, rr * 2.8, rr * 2.8)
         })
         ctx.globalAlpha = 1
       }
@@ -447,7 +498,7 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
       io.disconnect()
       box.removeEventListener('network:repaint', repaint)
     }
-  }, [layout, projects, universe, reduced, variant])
+  }, [layout, nodes, groups, universe, reduced, variant])
 
   useEffect(() => {
     wrap.current?.dispatchEvent(new Event('network:repaint'))
@@ -507,9 +558,10 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
     if (d && !d.moved) open(nearest(e.clientX, e.clientY))
   }
 
-  const n = projects.length
+  const n = nodes.length
   const tall = variant === 'page' ? 'h-[min(72vh,680px)]' : variant === 'widget' ? 'aspect-[4/3]' : 'h-[min(64vh,600px)]'
   const shown = selected ?? hover
+  const sel_ = selected != null ? nodes[selected] : null
 
   return (
     <div className="grid gap-4">
@@ -524,10 +576,13 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
       >
         <canvas ref={canvas} aria-hidden className="absolute inset-0" />
         <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap items-center gap-2 font-mono text-[12px] text-white/85">
-          <span className="rounded-pill bg-white/10 px-2.5 py-1 backdrop-blur">{universe ? 'universe.app' : 'network.app'}</span>
+          <span className="rounded-pill bg-white/10 px-2.5 py-1 backdrop-blur">{universe ? 'universe.app' : 'projects.app'}</span>
           <span className="rounded-pill bg-white/10 px-2.5 py-1 backdrop-blur">
             {n} {n === 1 ? 'project' : 'projects'} {universe ? 'in orbit' : 'connected'}
           </span>
+          {projects.length !== n && variant !== 'widget' && (
+            <span className="rounded-pill bg-white/10 px-2.5 py-1 backdrop-blur">from {projects.length} main projects</span>
+          )}
         </div>
         {variant !== 'widget' && (
           <p className="pointer-events-none absolute right-4 top-4 hidden font-mono text-[12px] text-white/60 sm:block">Drag to turn</p>
@@ -535,49 +590,57 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
         {!universe && variant !== 'widget' && (
           <div className="pointer-events-none absolute bottom-4 left-4 right-4 sm:right-auto sm:w-72">
             <p className="mb-1.5 font-mono text-[12px] text-white/85">
-              {Math.max(0, universeAt - n)} more projects until this network becomes a universe
+              {Math.max(0, universeAt - n)} more projects until this becomes a universe
             </p>
             <span className="block h-1.5 overflow-hidden rounded-full bg-white/15">
               <span className="block h-full rounded-full bg-gradient-to-r from-aqua to-lilac" style={{ width: `${Math.min(100, (n / universeAt) * 100)}%` }} />
             </span>
           </div>
         )}
-        {hover != null && selected == null && projects[hover] && (
+        {hover != null && selected == null && nodes[hover] && (
           <span
             ref={tipRef}
             className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap rounded-pill bg-window px-3 py-1 text-[13px] font-medium text-ink shadow-window"
             style={screen.current[hover] ? { transform: `translate(${screen.current[hover].x}px, ${screen.current[hover].y}px) translate(-50%, calc(-100% - 14px))` } : undefined}
           >
-            {projects[hover].client}
+            {partLabel(nodes[hover], projects[nodes[hover].pi])}
           </span>
         )}
-        {selected != null && projects[selected] && (
-          <Detail project={projects[selected]} onClose={() => setSelected(null)} compact={variant === 'widget'} />
+        {sel_ && (
+          <Detail
+            node={sel_}
+            project={projects[sel_.pi]}
+            parts={groups[sel_.pi].map((k) => ({ k, node: nodes[k] }))}
+            onPick={(k) => open(k)}
+            onClose={() => setSelected(null)}
+            compact={variant === 'widget'}
+          />
         )}
       </div>
 
       {variant !== 'widget' && (
         <div>
           <p className="mb-2 font-mono text-[12px] text-graphite">
-            Tap a {universe ? 'star' : 'glowing node'} or pick a project. Colour shows the service; a pulsing ring means it is in progress.
+            Tap a {universe ? 'star' : 'glowing node'} or pick a project. Each part of a project is its own node; colour shows the service and a pulsing ring means it is ongoing.
           </p>
-          <ul className="flex flex-wrap gap-2" aria-label="Projects in the network">
-            {projects.map((p, i) => (
-              <li key={p.slug || p.client}>
-                <button
-                  type="button"
-                  aria-pressed={selected === i}
-                  onClick={() => open(selected === i ? null : i)}
-                  onFocus={() => setHover(i)}
-                  onBlur={() => setHover(null)}
-                  className={`flex min-h-11 items-center gap-2 rounded-pill border px-3.5 text-[14px] transition ${shown === i ? 'border-ink bg-ink text-window' : 'border-hairline bg-window text-ink'}`}
-                >
-                  <span aria-hidden className="size-2.5 rounded-full" style={{ background: colorOf(p) }} />
-                  {p.client}
-                  {p.status === 'in-progress' && <span className="text-[12px] opacity-75">· in progress</span>}
-                </button>
-              </li>
-            ))}
+          <ul className="flex flex-wrap gap-2" aria-label="Ongoing and completed projects">
+            {projects.map((p, pi) => {
+              const parts = groups[pi]
+              if (parts.length === 1 && nodes[parts[0]].whole)
+                return (
+                  <li key={p.slug || p.client}>
+                    <Chip node={nodes[parts[0]]} label={p.client} pressed={selected === parts[0]} active={shown === parts[0]} onClick={() => open(selected === parts[0] ? null : parts[0])} onFocus={() => setHover(parts[0])} onBlur={() => setHover(null)} />
+                  </li>
+                )
+              return (
+                <li key={p.slug || p.client} className="flex flex-wrap items-center gap-1.5 rounded-[24px] border border-hairline bg-window/60 py-1 pl-3.5 pr-1">
+                  <span className="mr-1 text-[14px] font-medium">{p.client}</span>
+                  {parts.map((k) => (
+                    <Chip key={k} node={nodes[k]} label={nodes[k].title} aria={`${p.client}: ${nodes[k].title}`} pressed={selected === k} active={shown === k} onClick={() => open(selected === k ? null : k)} onFocus={() => setHover(k)} onBlur={() => setHover(null)} small />
+                  ))}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
@@ -585,24 +648,44 @@ export function ProjectNetwork({ projects: real, universeAt, mode: modeProp = 'a
   )
 }
 
-function Detail({ project: p, onClose, compact }: { project: NetProject; onClose: () => void; compact?: boolean }) {
+function Chip(props: { node: Node; label: string; aria?: string; pressed: boolean; active: boolean; small?: boolean; onClick: () => void; onFocus: () => void; onBlur: () => void }) {
+  const { node, label, active, small } = props
+  return (
+    <button
+      type="button"
+      aria-pressed={props.pressed}
+      aria-label={props.aria}
+      onClick={props.onClick}
+      onFocus={props.onFocus}
+      onBlur={props.onBlur}
+      className={`flex min-h-11 items-center gap-2 rounded-pill border px-3.5 transition ${small ? 'text-[13px]' : 'text-[14px]'} ${active ? 'border-ink bg-ink text-window' : 'border-hairline bg-window text-ink'}`}
+    >
+      <span aria-hidden className="size-2.5 rounded-full" style={{ background: colorOf(node) }} />
+      {label}
+      {node.status === 'in-progress' && <span className="text-[12px] opacity-75">· ongoing</span>}
+    </button>
+  )
+}
+
+function Detail({ node, project: p, parts, onPick, onClose, compact }: { node: Node; project: NetProject; parts: { k: number; node: Node }[]; onPick: (k: number) => void; onClose: () => void; compact?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     ref.current?.focus()
     const key = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
-  }, [onClose, p.slug])
+  }, [onClose, p.slug, node.title])
+  const ongoing = node.status === 'in-progress'
   return (
     <div
       ref={ref}
       tabIndex={-1}
       role="dialog"
-      aria-label={p.client}
+      aria-label={node.whole ? p.client : `${p.client}: ${node.title}`}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
-      className={`folder-pop absolute z-20 grid gap-2 rounded-[20px] border border-white/60 bg-window/95 p-4 text-ink shadow-lift outline-none backdrop-blur-xl ${
-        compact ? 'inset-x-3 bottom-3' : 'bottom-4 right-4 w-[min(92%,340px)] max-sm:inset-x-3 max-sm:w-auto'
+      className={`folder-pop absolute z-20 grid max-h-[calc(100%-24px)] gap-2 overflow-y-auto rounded-[20px] border border-white/60 bg-window/95 p-4 text-ink shadow-lift outline-none backdrop-blur-xl ${
+        compact ? 'inset-x-3 bottom-3' : 'bottom-4 right-4 w-[min(92%,360px)] max-sm:inset-x-3 max-sm:w-auto'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -611,16 +694,23 @@ function Detail({ project: p, onClose, compact }: { project: NetProject; onClose
             {p.industry} · {p.location === 'LK' ? 'Sri Lanka' : 'International'}
           </p>
           <h3 className="text-[19px] font-semibold tracking-tight">{p.client}</h3>
+          {!node.whole && (
+            <p className="mt-0.5 text-[15px] font-medium">
+              <span aria-hidden className="mr-1.5 inline-block size-2.5 rounded-full" style={{ background: colorOf(node) }} />
+              {node.title}
+              <span className="font-normal text-graphite"> · {PILLAR_NAMES[node.service]}</span>
+            </p>
+          )}
         </div>
         <button type="button" onClick={onClose} aria-label="Close" className="-m-1.5 grid size-11 shrink-0 place-items-center rounded-full hover:bg-ink/5">
           <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       </div>
-      {p.status === 'in-progress' && (
-        <p className="w-fit rounded-pill bg-tangerine/25 px-2.5 py-0.5 text-[13px] font-medium">In progress{p.progress ? `: ${p.progress}` : ''}</p>
-      )}
-      <p className="text-[15px] leading-snug text-ink/85">{p.result}</p>
-      {!compact && p.metrics.length > 0 && (
+      <p className={`w-fit rounded-pill px-2.5 py-0.5 text-[13px] font-medium ${ongoing ? 'bg-tangerine/25' : 'bg-lime/40'}`}>
+        {ongoing ? `Ongoing${node.whole && p.progress ? `: ${p.progress}` : ''}` : 'Completed'}
+      </p>
+      <p className="text-[15px] leading-snug text-ink/85">{node.summary || p.result}</p>
+      {!compact && node.whole && p.metrics.length > 0 && (
         <dl className="flex gap-5">
           {p.metrics.slice(0, 2).map((m) => (
             <div key={m.label}>
@@ -630,14 +720,35 @@ function Detail({ project: p, onClose, compact }: { project: NetProject; onClose
           ))}
         </dl>
       )}
-      <div className="flex flex-wrap gap-1.5">
-        {p.pillars.map((x) => (
-          <span key={x} className="flex items-center gap-1.5 rounded-pill border border-hairline px-2 py-0.5 text-[12px]">
-            <span aria-hidden className="size-2 rounded-full" style={{ background: COLORS[x] }} />
-            {PILLAR_NAMES[x]}
-          </span>
-        ))}
-      </div>
+      {parts.length > 1 ? (
+        <div>
+          <p className="mb-1 text-[12px] text-graphite">{parts.length} parts of this project, each counted as a project</p>
+          <div className="flex flex-wrap gap-1.5">
+            {parts.map(({ k, node: x }) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={x === node}
+                onClick={() => onPick(k)}
+                className={`flex min-h-8 items-center gap-1.5 rounded-pill border px-2.5 text-[12px] ${x === node ? 'border-ink bg-ink text-window' : 'border-hairline'}`}
+              >
+                <span aria-hidden className="size-2 rounded-full" style={{ background: colorOf(x) }} />
+                {x.title}
+                {x.status === 'in-progress' && <span className="opacity-75">· ongoing</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {p.pillars.map((x) => (
+            <span key={x} className="flex items-center gap-1.5 rounded-pill border border-hairline px-2 py-0.5 text-[12px]">
+              <span aria-hidden className="size-2 rounded-full" style={{ background: COLORS[x] }} />
+              {PILLAR_NAMES[x]}
+            </span>
+          ))}
+        </div>
+      )}
       {p.slug && (
         <Link href={`/work/${p.slug}`} className="mt-1 text-[15px] font-medium text-aqua-deep underline-offset-4 hover:underline">
           Open the project →

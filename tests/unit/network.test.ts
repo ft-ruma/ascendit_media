@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { brainLayout, brainPointsFor, galaxyStar, inBrain } from '@/network/geometry'
+import { toNet } from '@/network/toNet'
+import { countNodes } from '@/network/types'
+import { caseStudies } from '@/seed/data'
 
 const dist = (a: { x: number; y: number; z: number }, b: { x: number; y: number; z: number }) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
 
@@ -56,5 +59,26 @@ describe('project network geometry', () => {
     expect(galaxyStar(42)).toEqual(galaxyStar(42))
     const d = (i: number) => Math.hypot(galaxyStar(i).x, galaxyStar(i).z)
     expect(d(0)).toBeLessThan(d(300))
+  })
+
+  it('counts every sub-project as one project (a project without parts counts as one)', () => {
+    const net = toNet(caseStudies)
+    expect(net.map((p) => p.parts.length)).toEqual([1, 3, 1, 3]) // oldest first: clinic, tea, pharmacy, grocer
+    expect(countNodes(net)).toBe(8)
+    expect(net[0].parts[0]).toMatchObject({ whole: true, title: 'Sample Clinic Group' })
+    expect(net[1].parts[2]).toMatchObject({ title: 'Social media marketing', status: 'in-progress', date: '2026-09-01' })
+  })
+
+  it("keeps a project's parts together, and appending never moves earlier nodes", () => {
+    // groups: project 0 has 1 part, project 1 has 3, project 2 has 1, project 3 has 3
+    const groups = [0, 1, 1, 1, 2, 3, 3, 3]
+    const { points, projectSlots, gap } = brainLayout(100, groups)
+    const d = (a: number, b: number) => dist(points[projectSlots[a]], points[projectSlots[b]])
+    // a part sits closer to its own project's first part than unrelated projects do, on average
+    const own = (d(1, 2) + d(1, 3) + d(5, 6) + d(5, 7)) / 4
+    const other = (d(1, 5) + d(0, 4) + d(1, 4) + d(0, 5)) / 4
+    expect(own).toBeLessThan(other)
+    expect(own).toBeLessThan(gap * 2.2)
+    expect(brainLayout(100, [...groups, 3, 4]).projectSlots.slice(0, 8)).toEqual(projectSlots)
   })
 })
